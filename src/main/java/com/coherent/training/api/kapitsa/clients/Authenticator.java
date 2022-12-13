@@ -2,7 +2,6 @@ package com.coherent.training.api.kapitsa.clients;
 
 import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
 import lombok.SneakyThrows;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -11,7 +10,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
@@ -20,9 +18,11 @@ import java.util.logging.Logger;
 
 import static com.coherent.training.api.kapitsa.base.BaseTest.client;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
-import static java.util.logging.Logger.*;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.logging.Logger.getLogger;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.HttpStatus.SC_OK;
 
 public class Authenticator {
     private static final String CLIENT_ID = ConfigFileReader.getInstance().getClientId();
@@ -60,7 +60,7 @@ public class Authenticator {
 
         CloseableHttpResponse response = client.execute(postRequest);
 
-        String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        String responseBody = EntityUtils.toString(response.getEntity(), UTF_8);
 
         LOGGER.log(Level.INFO, "Response: " + response);
 
@@ -68,7 +68,7 @@ public class Authenticator {
 
         response.close();
 
-        if(statusCode == HttpStatus.SC_OK) return new JSONObject(responseBody).getString("access_token");
+        if(statusCode == SC_OK) return new JSONObject(responseBody).getString("access_token");
 
         else throw new RuntimeException("Access toke is not returned because status code is not 200");
     }

@@ -4,7 +4,6 @@ import lombok.SneakyThrows;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.Map;
 import java.util.Properties;
 
 import static com.coherent.training.api.kapitsa.providers.ConfigProvider.CLIENT_ID;
@@ -12,7 +11,6 @@ import static com.coherent.training.api.kapitsa.providers.ConfigProvider.CLIENT_
 
 public class ConfigFileReader {
     private Properties properties;
-    private static Map<String, Properties> propsCache;
     private static final String CONFIG_PATH = "configs//config.properties";
 
     @SneakyThrows
