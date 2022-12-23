@@ -2,56 +2,48 @@ package com.coherent.training.api.kapitsa.clients;
 
 import com.coherent.training.api.kapitsa.base.BaseClientObject;
 import lombok.SneakyThrows;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+import static com.coherent.training.api.kapitsa.clients.Authenticator.getInstance;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.EXPAND_ZIP_CODES;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.GET_ZIP_CODES;
-import static java.util.logging.Logger.getLogger;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
 public class ZipCode extends BaseClientObject {
-    private static final String GET_ZIP_CODES_URL = GET_ZIP_CODES.getUrl();
-    private static final String EXPAND_ZIP_CODES_URL = EXPAND_ZIP_CODES.getUrl();
-    private static final Logger logger = getLogger(Authenticator.class.getName());
+    private static final String GET_ZIP_CODES_URL = GET_ZIP_CODES.getEndpoint();
+    private static final String EXPAND_ZIP_CODES_URL = EXPAND_ZIP_CODES.getEndpoint();
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
+    private static final Authenticator authenticator = getInstance();
 
     @SneakyThrows
     public String getAllZipCodes(){
-        setupGetRequest(GET_ZIP_CODES_URL);
+        setupGetRequest(GET_ZIP_CODES_URL, authenticator.getBearerTokenForReadScope());
 
-        logger.log(Level.INFO, "Request: " + getRequest);
+        logger.info("Request: {}", getRequest);
 
         executeGetRequest();
 
-        String responseCode = String.valueOf(getResponseCode());
-
         String responseBody = getResponseBody();
 
-        logger.log(Level.INFO, "Response: " + response + "\n" + responseBody);
+        logger.info("Response: {}", response + "\n" + responseBody);
 
-        if (responseCode.startsWith("2")) return responseBody;
-
-        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
+        return responseBody;
     }
 
     public String addNewZipCodes(String... zipCodes){
-        setupPostRequest(EXPAND_ZIP_CODES_URL, Arrays.toString(zipCodes));
+        setupPostRequest(EXPAND_ZIP_CODES_URL, Arrays.toString(zipCodes), authenticator.getBearerTokenForWriteScope());
 
-        logger.log(Level.INFO, "Request: " + postRequest + "\n" + getRequestBody());
+        logger.info("Request: {}", postRequest + "\n" + getRequestBody());
 
         executePostRequest();
 
         String responseBody = getResponseBody();
 
-        String responseCode = String.valueOf(getResponseCode());
+        logger.info("Response: {}", response + "\n" + responseBody);
 
-        logger.log(Level.INFO, "Response: " + response + "\n" + responseBody);
-
-        if (responseCode.startsWith("2")) return responseBody;
-
-        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
+        return responseBody;
     }
 
     public int getStatusCodeOfResponse(){

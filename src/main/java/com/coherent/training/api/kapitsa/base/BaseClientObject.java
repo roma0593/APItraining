@@ -1,15 +1,17 @@
 package com.coherent.training.api.kapitsa.base;
 
-import com.coherent.training.api.kapitsa.clients.Authenticator;
 import lombok.SneakyThrows;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.util.EntityUtils;
 
+import java.util.List;
+
 import static com.coherent.training.api.kapitsa.base.BaseTest.client;
-import static com.coherent.training.api.kapitsa.clients.Authenticator.getInstance;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
@@ -18,21 +20,25 @@ public class BaseClientObject {
     protected HttpGet getRequest;
     protected HttpPost postRequest;
     protected CloseableHttpResponse response;
-    private static final Authenticator AUTHENTICATOR = getInstance();
 
-    protected void setupGetRequest(String endpoint){
-        String bearerToken = AUTHENTICATOR.getBearerTokenForReadScope();
+    protected void setupGetRequest(String endpoint, String token){
         getRequest = new HttpGet(endpoint);
 
-        getRequest.setHeader(AUTHORIZATION, "Bearer " + bearerToken);
+        getRequest.setHeader(AUTHORIZATION, "Bearer " + token);
     }
 
-    protected void setupPostRequest(String endpoint, String bodyValue){
-        String bearerToken = AUTHENTICATOR.getBearerTokenForWriteScope();
+    protected void setupPostRequest(String endpoint, String bodyValue, String token){
         postRequest = new HttpPost(endpoint);
 
-        setPostRequestHeaders(AUTHORIZATION, "Bearer " + bearerToken, CONTENT_TYPE, "application/json");
+        setPostRequestHeaders(AUTHORIZATION, "Bearer " + token, CONTENT_TYPE, "application/json");
         setRequestBody(bodyValue);
+    }
+
+    protected void setUpAuthorizationRequest(String endpoint, List<NameValuePair> nameValuePairs, String... headers){
+        postRequest = new HttpPost(endpoint);
+
+        setPostRequestHeaders(headers);
+        setEncodedRequestBody(nameValuePairs);
     }
 
     protected int getResponseCode(){
@@ -64,6 +70,11 @@ public class BaseClientObject {
         StringEntity entity = new StringEntity(json);
 
         postRequest.setEntity(entity);
+    }
+
+    @SneakyThrows
+    private void setEncodedRequestBody(List<NameValuePair> nameValuePairs){
+        postRequest.setEntity(new UrlEncodedFormEntity(nameValuePairs, "utf-8"));
     }
 
     private void setPostRequestHeaders(String... headerValues){

@@ -1,34 +1,28 @@
 package com.coherent.training.api.kapitsa.clients;
 
+import com.coherent.training.api.kapitsa.base.BaseClientObject;
 import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
+import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-import static com.coherent.training.api.kapitsa.base.BaseTest.client;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.logging.Logger.getLogger;
+import static com.coherent.training.api.kapitsa.util.DataHandler.getTokenObj;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class Authenticator {
+public class Authenticator extends BaseClientObject {
     private static final String CLIENT_ID = ConfigFileReader.getInstance().getClientId();
     private static final String CLIENT_SECRET = ConfigFileReader.getInstance().getClientSecret();
-    private static final String oauthUrl = OAUTH_URL.getUrl();
-    private static final Logger LOGGER = getLogger(Authenticator.class.getName());
+    private static final String oauthUrl = OAUTH_URL.getEndpoint();
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
 
     private Authenticator() {}
 
@@ -50,27 +44,24 @@ public class Authenticator {
 
     @SneakyThrows
     private String getBearerTokenForScope(String scope){
-        HttpPost postRequest = new HttpPost(oauthUrl);
+        setUpAuthorizationRequest(oauthUrl, getAuthForm(scope),
+                AUTHORIZATION, "Basic " + getEncodedBasicAuthData(),
+                CONTENT_TYPE, "application/x-www-form-urlencoded");
 
-        postRequest.setHeader(AUTHORIZATION, "Basic " + getEncodedBasicAuthData());
-        postRequest.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
-        postRequest.setEntity(new UrlEncodedFormEntity(getAuthForm(scope), "utf-8"));
+        logger.info("Request: {}", postRequest);
 
-        LOGGER.log(Level.INFO, "Request: " + postRequest);
+        executePostRequest();
 
-        CloseableHttpResponse response = client.execute(postRequest);
+        String responseBody = getResponseBody();
 
-        String responseBody = EntityUtils.toString(response.getEntity(), UTF_8);
+        logger.info("Response: {}", response);
 
-        LOGGER.log(Level.INFO, "Response: " + response);
-
-        int statusCode = response.getStatusLine().getStatusCode();
+        int responseCode = getResponseCode();
 
         response.close();
 
-        if(statusCode == SC_OK) return new JSONObject(responseBody).getString("access_token");
-
-        else throw new RuntimeException("Access toke is not returned because status code is not 200");
+        if(responseCode == SC_OK) return getAccessToken(responseBody);
+        else throw new RuntimeException("Access token has not been returned");
     }
 
     private List<NameValuePair> getAuthForm(String authScope){
@@ -87,5 +78,11 @@ public class Authenticator {
         String keys = CLIENT_ID + ":" + CLIENT_SECRET;
 
         return Base64.getEncoder().encodeToString(keys.getBytes());
+    }
+
+    private String getAccessToken(String responseBody){
+        Token tokenObj = getTokenObj(responseBody);
+
+        return tokenObj.getAccessToken();
     }
 }

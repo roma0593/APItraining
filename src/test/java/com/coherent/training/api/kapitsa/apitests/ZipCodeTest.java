@@ -6,6 +6,7 @@ import com.coherent.training.api.kapitsa.utils.JsonParser;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import static java.lang.String.valueOf;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.testng.Assert.assertEquals;
@@ -18,9 +19,10 @@ public class ZipCodeTest extends BaseTest {
 
         String zipCodes = zipCodeClient.getAllZipCodes();
 
-        String[] zipCodesArray = new JsonParser().getArray(zipCodes);
-
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
+
+        if (valueOf(responseCode).startsWith("2")) zipCodesArray = new JsonParser().getArray(zipCodes);
+        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
 
         zipCodeClient.closeResponse();
 
@@ -36,9 +38,10 @@ public class ZipCodeTest extends BaseTest {
 
         String returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode2, zipCode3);
 
-        String[] zipCodesArray = new JsonParser().getArray(returnedZipCodes);
-
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
+
+        if (valueOf(responseCode).startsWith("2")) zipCodesArray = new JsonParser().getArray(returnedZipCodes);
+        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
 
         boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesArray, zipCode1, zipCode2, zipCode3);
 
@@ -55,9 +58,10 @@ public class ZipCodeTest extends BaseTest {
 
         String returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode4, zipCode2, zipCode2);
 
-        String[] zipCodesArray = new JsonParser().getArray(returnedZipCodes);
-
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
+
+        if (valueOf(responseCode).startsWith("2")) zipCodesArray = new JsonParser().getArray(returnedZipCodes);
+        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
 
         boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesArray, zipCode4, zipCode2, zipCode2);
         boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesArray, zipCode4, zipCode2, zipCode2);
@@ -76,9 +80,10 @@ public class ZipCodeTest extends BaseTest {
 
         String returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode5);
 
-        String[] zipCodesArray = new JsonParser().getArray(returnedZipCodes);
-
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
+
+        if (valueOf(responseCode).startsWith("2")) zipCodesArray = new JsonParser().getArray(returnedZipCodes);
+        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
 
         boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesArray, zipCode1, zipCode5);
         boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesArray, zipCode1, zipCode5);

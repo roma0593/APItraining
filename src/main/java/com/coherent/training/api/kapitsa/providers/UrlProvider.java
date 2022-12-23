@@ -1,17 +1,19 @@
 package com.coherent.training.api.kapitsa.providers;
 
 public enum UrlProvider {
-    OAUTH_URL("http://localhost:5050/oauth/token"),
-    GET_ZIP_CODES("http://localhost:5050/zip-codes"),
-    EXPAND_ZIP_CODES("http://localhost:5050/zip-codes/expand");
+    OAUTH_URL("/oauth/token"),
+    GET_ZIP_CODES("/zip-codes"),
+    EXPAND_ZIP_CODES("/zip-codes/expand");
 
-    private final String url;
+    private static final String HOST_URL = ConfigFileReader.getInstance().getHostUrl();
 
-    UrlProvider(String url) {
-        this.url = url;
+    private final String endpoint;
+
+    UrlProvider(String endpoint) {
+        this.endpoint = endpoint;
     }
 
-    public String getUrl() {
-        return url;
+    public String getEndpoint() {
+        return HOST_URL + endpoint;
     }
 }

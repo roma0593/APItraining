@@ -1,29 +1,49 @@
 package com.coherent.training.api.kapitsa.providers;
 
 import lombok.SneakyThrows;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
+import static com.coherent.training.api.kapitsa.providers.ConfigProvider.*;
 import static com.coherent.training.api.kapitsa.providers.ConfigProvider.CLIENT_ID;
 import static com.coherent.training.api.kapitsa.providers.ConfigProvider.CLIENT_SECRET;
 
 public class ConfigFileReader {
     private Properties properties;
+    private static Map<String, Properties> propsCache;
     private static final String CONFIG_PATH = "configs//config.properties";
+    private static final String PROFILE_PATH = "configs//profile.properties";
 
     @SneakyThrows
-    private ConfigFileReader() {}
+    private ConfigFileReader() {setPropsCache();}
 
     @SneakyThrows
-    private void setProperty() {
+    private void setPropsCache(){
+        List<String> propPathList = List.of(CONFIG_PATH, PROFILE_PATH);
+        propsCache = new HashMap<>();
         BufferedReader reader;
 
-        reader = new BufferedReader(new FileReader(CONFIG_PATH));
+        for(String propPath : propPathList){
+            reader = new BufferedReader(new FileReader(propPath));
+            Properties property = new Properties();
+            property.load(reader);
 
-        properties = new Properties();
-        properties.load(reader);
+            String propertyName = FilenameUtils.getName(propPath);
+
+            propsCache.put(propertyName, property);
+        }
+    }
+
+    private static Properties getPropertyFromCache(String path){
+        String propertyName = FilenameUtils.getName(path);
+
+        return propsCache.get(propertyName);
     }
 
     private static class SingletonConfigFileReader {
@@ -35,7 +55,7 @@ public class ConfigFileReader {
     }
 
     public String getClientId() {
-        setProperty();
+        properties = getPropertyFromCache(CONFIG_PATH);
 
         String clientId = properties.getProperty(CLIENT_ID.getPropertyKey());
 
@@ -44,11 +64,24 @@ public class ConfigFileReader {
     }
 
     public String getClientSecret() {
-        setProperty();
+        properties = getPropertyFromCache(CONFIG_PATH);
 
         String clientSecret = properties.getProperty(CLIENT_SECRET.getPropertyKey());
 
         if (clientSecret != null) return clientSecret;
         else throw new RuntimeException("Client secret is not specified");
+    }
+
+    public String getHostUrl(){
+        properties = getPropertyFromCache(PROFILE_PATH);
+
+        String profile = properties.getProperty(PROFILE.getPropertyKey());
+
+        String hostUrlKey = String.format(HOST_KEY.getPropertyKey(), profile);
+
+        String hostUrl = properties.getProperty(hostUrlKey);
+
+        if (hostUrl != null) return hostUrl;
+        else throw new RuntimeException("hostURL is not specified");
     }
 }
