@@ -7,81 +7,133 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.coherent.training.api.kapitsa.base.BaseTest.client;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
 public class BaseClientObject {
-    protected HttpGet getRequest;
-    protected HttpPost postRequest;
-    protected CloseableHttpResponse response;
+    private final CloseableHttpClient client;
+    private final HttpGet getRequest;
+    private final HttpPost postRequest;
+    private CloseableHttpResponse response;
 
-    protected void setupGetRequest(String endpoint, String token){
-        getRequest = new HttpGet(endpoint);
-
-        getRequest.setHeader(AUTHORIZATION, "Bearer " + token);
+    public BaseClientObject(BaseClientObjectBuilder builder) {
+        this.client = builder.client;
+        this.getRequest = builder.getRequest;
+        this.postRequest = builder.postRequest;
     }
 
-    protected void setupPostRequest(String endpoint, String bodyValue, String token){
-        postRequest = new HttpPost(endpoint);
-
-        setPostRequestHeaders(AUTHORIZATION, "Bearer " + token, CONTENT_TYPE, "application/json");
-        setRequestBody(bodyValue);
+    public CloseableHttpClient getClient(){
+        return client;
     }
 
-    protected void setUpAuthorizationRequest(String endpoint, List<NameValuePair> nameValuePairs, String... headers){
-        postRequest = new HttpPost(endpoint);
-
-        setPostRequestHeaders(headers);
-        setEncodedRequestBody(nameValuePairs);
-    }
-
-    protected int getResponseCode(){
+    public int getResponseCode(){
         return response.getStatusLine().getStatusCode();
     }
 
+    public HttpGet getGETRequest(){
+        return getRequest;
+    }
+
+    public HttpPost getPOSTRequest(){
+        return postRequest;
+    }
+
     @SneakyThrows
-    protected void executeGetRequest(){
+    public CloseableHttpResponse executeGetRequest(){
         response = client.execute(getRequest);
+
+        return response;
     }
 
     @SneakyThrows
-    protected void executePostRequest(){
+    public CloseableHttpResponse executePostRequest(){
         response = client.execute(postRequest);
+
+        return response;
     }
 
     @SneakyThrows
-    protected String getResponseBody(){
+    public String getResponseBody(){
         return EntityUtils.toString(response.getEntity(), UTF_8);
     }
 
     @SneakyThrows
-    protected String getRequestBody(){
+    public String getRequestBody(){
         return EntityUtils.toString(postRequest.getEntity());
     }
 
-    @SneakyThrows
-    private void setRequestBody(String json){
-        StringEntity entity = new StringEntity(json);
+    public static class BaseClientObjectBuilder{
+        private CloseableHttpClient client;
+        private HttpGet getRequest;
+        private HttpPost postRequest;
 
-        postRequest.setEntity(entity);
-    }
+        public BaseClientObjectBuilder() {
+        }
 
-    @SneakyThrows
-    private void setEncodedRequestBody(List<NameValuePair> nameValuePairs){
-        postRequest.setEntity(new UrlEncodedFormEntity(nameValuePairs, "utf-8"));
-    }
+        public BaseClientObjectBuilder setClient(CloseableHttpClient client){
+            this.client = client;
 
-    private void setPostRequestHeaders(String... headerValues){
-        int size = headerValues.length;
+            return this;
+        }
 
-        for(int i = 0; i < size; i+=2){
-            postRequest.setHeader(headerValues[i], headerValues[i+1]);
+        public BaseClientObjectBuilder setGetRequest(String endpoint, String token){
+            getRequest = new HttpGet(endpoint);
+
+            getRequest.setHeader(AUTHORIZATION, "Bearer " + token);
+
+            return this;
+        }
+
+        public BaseClientObjectBuilder setPostRequest(String endpoint, String bodyValue, String token){
+            postRequest = new HttpPost(endpoint);
+            Map<String, String> headersMap = new HashMap<>();
+
+            headersMap.put(AUTHORIZATION, "Bearer " + token);
+            headersMap.put(CONTENT_TYPE, "application/json");
+
+            setPostRequestHeaders(headersMap);
+            setRequestBody(bodyValue);
+
+            return this;
+        }
+
+        public BaseClientObjectBuilder setAuthorizationRequest(String endpoint, List<NameValuePair> nameValuePairs, Map<String, String> headersMap){
+            postRequest = new HttpPost(endpoint);
+
+            setPostRequestHeaders(headersMap);
+            setEncodedRequestBody(nameValuePairs);
+
+            return this;
+        }
+
+        @SneakyThrows
+        private void setRequestBody(String json){
+            StringEntity entity = new StringEntity(json);
+
+            postRequest.setEntity(entity);
+        }
+
+        @SneakyThrows
+        private void setEncodedRequestBody(List<NameValuePair> nameValuePairs){
+            postRequest.setEntity(new UrlEncodedFormEntity(nameValuePairs, "utf-8"));
+        }
+
+        private void setPostRequestHeaders(Map<String, String> headersMap){
+            for(String key : headersMap.keySet()){
+                postRequest.setHeader(key, headersMap.get(key));
+            }
+        }
+
+        public BaseClientObject build(){
+            return new BaseClientObject(this);
         }
     }
 }

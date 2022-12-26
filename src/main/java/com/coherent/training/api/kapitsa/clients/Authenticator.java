@@ -5,26 +5,27 @@ import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
 import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
+import java.util.*;
 
+import static com.coherent.training.api.kapitsa.base.BaseClientObject.BaseClientObjectBuilder;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
 import static com.coherent.training.api.kapitsa.util.DataHandler.getTokenObj;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_OK;
 
-public class Authenticator extends BaseClientObject {
+public class Authenticator {
     private static final String CLIENT_ID = ConfigFileReader.getInstance().getClientId();
     private static final String CLIENT_SECRET = ConfigFileReader.getInstance().getClientSecret();
     private static final String oauthUrl = OAUTH_URL.getEndpoint();
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
 
-    private Authenticator() {}
+    private Authenticator(){
+    }
 
     private static class SingletonAuthenticator{
         private static final Authenticator INSTANCE = new Authenticator();
@@ -34,33 +35,40 @@ public class Authenticator extends BaseClientObject {
         return SingletonAuthenticator.INSTANCE;
     }
 
-    public String getBearerTokenForReadScope(){
-        return getBearerTokenForScope("read");
+    public String getBearerTokenForReadScope(BaseClientObjectBuilder builder){
+        return getBearerTokenForScope("read", builder);
     }
 
-    public String getBearerTokenForWriteScope(){
-        return getBearerTokenForScope("write");
+    public String getBearerTokenForWriteScope(BaseClientObjectBuilder builder){
+        return getBearerTokenForScope("write", builder);
+    }
+
+    private Map<String, String> setHeadersMapForOauth(){
+        Map<String, String> headersMap = new HashMap<>();
+        headersMap.put(AUTHORIZATION, "Basic " + getEncodedBasicAuthData());
+        headersMap.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
+
+        return headersMap;
     }
 
     @SneakyThrows
-    private String getBearerTokenForScope(String scope){
-        setUpAuthorizationRequest(oauthUrl, getAuthForm(scope),
-                AUTHORIZATION, "Basic " + getEncodedBasicAuthData(),
-                CONTENT_TYPE, "application/x-www-form-urlencoded");
+    private String getBearerTokenForScope(String scope, BaseClientObjectBuilder builder){
+        BaseClientObject baseClient = builder.setAuthorizationRequest(oauthUrl, getAuthForm(scope), setHeadersMapForOauth())
+                .build();
 
-        logger.info("Request: {}", postRequest);
+        logger.info("Request: {}", baseClient.getPOSTRequest());
 
-        executePostRequest();
+        CloseableHttpResponse response = baseClient.executePostRequest();
 
-        String responseBody = getResponseBody();
+        String responseBody = baseClient.getResponseBody();
 
         logger.info("Response: {}", response);
 
-        int responseCode = getResponseCode();
+        int responseCode = baseClient.getResponseCode();
 
         response.close();
 
-        if(responseCode == SC_OK) return getAccessToken(responseBody);
+        if(responseCode == SC_OK) return getToken(responseBody).getAccessToken();
         else throw new RuntimeException("Access token has not been returned");
     }
 
@@ -80,9 +88,7 @@ public class Authenticator extends BaseClientObject {
         return Base64.getEncoder().encodeToString(keys.getBytes());
     }
 
-    private String getAccessToken(String responseBody){
-        Token tokenObj = getTokenObj(responseBody);
-
-        return tokenObj.getAccessToken();
+    private Token getToken(String responseBody){
+        return getTokenObj(responseBody);
     }
 }

@@ -1,31 +1,45 @@
 package com.coherent.training.api.kapitsa.clients;
 
 import com.coherent.training.api.kapitsa.base.BaseClientObject;
+import com.google.gson.Gson;
 import lombok.SneakyThrows;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 
+import static com.coherent.training.api.kapitsa.base.BaseClientObject.*;
 import static com.coherent.training.api.kapitsa.clients.Authenticator.getInstance;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.EXPAND_ZIP_CODES;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.GET_ZIP_CODES;
+import static java.lang.String.valueOf;
 import static org.apache.commons.lang3.ArrayUtils.contains;
 
-public class ZipCode extends BaseClientObject {
+public class ZipCode {
     private static final String GET_ZIP_CODES_URL = GET_ZIP_CODES.getEndpoint();
     private static final String EXPAND_ZIP_CODES_URL = EXPAND_ZIP_CODES.getEndpoint();
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
     private static final Authenticator authenticator = getInstance();
+    private static final BaseClientObjectBuilder builder = new BaseClientObjectBuilder();
+    private BaseClientObject baseClient;
+    private CloseableHttpResponse response;
+
+    public ZipCode(CloseableHttpClient client) {
+        builder.setClient(client);
+    }
 
     @SneakyThrows
     public String getAllZipCodes(){
-        setupGetRequest(GET_ZIP_CODES_URL, authenticator.getBearerTokenForReadScope());
+        String bearerToken = authenticator.getBearerTokenForReadScope(builder);
 
-        logger.info("Request: {}", getRequest);
+        baseClient = builder.setGetRequest(GET_ZIP_CODES_URL, bearerToken).build();
 
-        executeGetRequest();
+        logger.info("Request: {}", baseClient.getGETRequest());
 
-        String responseBody = getResponseBody();
+        response = baseClient.executeGetRequest();
+
+        String responseBody = baseClient.getResponseBody();
 
         logger.info("Response: {}", response + "\n" + responseBody);
 
@@ -33,23 +47,35 @@ public class ZipCode extends BaseClientObject {
     }
 
     public String addNewZipCodes(String... zipCodes){
-        setupPostRequest(EXPAND_ZIP_CODES_URL, Arrays.toString(zipCodes), authenticator.getBearerTokenForWriteScope());
+        String bearerToken = authenticator.getBearerTokenForWriteScope(builder);
 
-        logger.info("Request: {}", postRequest + "\n" + getRequestBody());
+        baseClient = builder.setPostRequest(EXPAND_ZIP_CODES_URL, Arrays.toString(zipCodes), bearerToken)
+                .build();
 
-        executePostRequest();
+        logger.info("Request: {}", baseClient.getPOSTRequest() + "\n" + baseClient.getRequestBody());
 
-        String responseBody = getResponseBody();
+        response = baseClient.executePostRequest();
+
+        String responseBody = baseClient.getResponseBody();
 
         logger.info("Response: {}", response + "\n" + responseBody);
 
         return responseBody;
     }
 
+    public String[] getArrayFromResponse(String response){
+        Gson gson = new Gson();
+
+        String responseCode = valueOf(getStatusCodeOfResponse());
+
+        if (responseCode.startsWith("2")) return gson.fromJson(response, String[].class);
+        else throw new RuntimeException("Zip codes are not returned because response code is not in 2xx");
+    }
+
     public int getStatusCodeOfResponse(){
         assert response != null;
 
-        return getResponseCode();
+        return baseClient.getResponseCode();
     }
 
     public boolean zipCodesAreSaved(String[] responseArray, String... zipCodes){
