@@ -27,6 +27,8 @@ public class ZipCode {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
     private static final Authenticator authenticator = getInstance();
     private static final BaseClientObjectBuilder builder = new BaseClientObjectBuilder();
+    private static final String POST = "POST";
+    private static final String GET = "GET";
     private BaseClientObject baseClient;
     private CloseableHttpResponse response;
 
@@ -36,13 +38,11 @@ public class ZipCode {
 
     @SneakyThrows
     public String getAllZipCodes(){
-        String bearerToken = authenticator.getBearerTokenForReadScope(builder);
+        baseClient = builder.setRequest(GET_ZIP_CODES_URL, GET, setHeadersMap("read")).build();
 
-        baseClient = builder.setGetRequest(GET_ZIP_CODES_URL, bearerToken).build();
+        logger.info("Request: {}", baseClient.getRequest());
 
-        logger.info("Request: {}", baseClient.getGETRequest());
-
-        response = baseClient.executeGetRequest();
+        response = baseClient.executeRequest();
 
         String responseBody = baseClient.getResponseBody(response);
 
@@ -53,16 +53,14 @@ public class ZipCode {
 
     @SneakyThrows
     public String addNewZipCodes(String... zipCodes){
-        String bearerToken = authenticator.getBearerTokenForWriteScope(builder);
-
         StringEntity entity = new StringEntity(Arrays.toString(zipCodes));
 
-        baseClient = builder.setPostRequest(EXPAND_ZIP_CODES_URL, setHeadersMap(bearerToken), entity)
+        baseClient = builder.setRequest(EXPAND_ZIP_CODES_URL, POST, setHeadersMap("write"), entity)
                 .build();
 
-        logger.info("Request: {}", baseClient.getPOSTRequest() + "\n" + baseClient.getRequestBody());
+        logger.info("Request: {}", baseClient.getRequest() + "\n" + baseClient.getRequestBody());
 
-        response = baseClient.executePostRequest();
+        response = baseClient.executeRequest();
 
         String responseBody = baseClient.getResponseBody(response);
 
@@ -116,7 +114,10 @@ public class ZipCode {
         return isUnique;
     }
 
-    private Map<String, String> setHeadersMap(String bearerToken){
+    private Map<String, String> setHeadersMap(String scope){
+        String bearerToken = (scope.equals("read")) ? authenticator.getBearerTokenForReadScope(builder)
+                : authenticator.getBearerTokenForWriteScope(builder);
+
         Map<String, String> headersMap = new HashMap<>();
 
         headersMap.put(AUTHORIZATION, "Bearer " + bearerToken);

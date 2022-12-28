@@ -25,6 +25,7 @@ public class Authenticator {
     private static final String CLIENT_SECRET = ConfigFileReader.getInstance().getClientSecret();
     private static final String oauthUrl = OAUTH_URL.getEndpoint();
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
+    private static final String POST = "POST";
 
     private Authenticator(){
     }
@@ -49,12 +50,12 @@ public class Authenticator {
     private String getBearerTokenForScope(String scope, BaseClientObjectBuilder builder){
         StringEntity entity = new UrlEncodedFormEntity(getAuthForm(scope), "utf-8");
 
-        BaseClientObject baseClient = builder.setPostRequest(oauthUrl, setHeadersMap(), entity)
+        BaseClientObject baseClient = builder.setRequest(oauthUrl, POST, setHeadersMap(), entity)
                 .build();
 
-        logger.info("Request: {}", baseClient.getPOSTRequest());
+        logger.info("Request: {}", baseClient.getRequest());
 
-        CloseableHttpResponse response = baseClient.executePostRequest();
+        CloseableHttpResponse response = baseClient.executeRequest();
 
         String responseBody = baseClient.getResponseBody(response);
 

@@ -2,31 +2,26 @@ package com.coherent.training.api.kapitsa.base;
 
 import lombok.SneakyThrows;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 public class BaseClientObject {
     private final CloseableHttpClient client;
-    private final HttpUriRequest GETRequest;
-    private final HttpUriRequest POSTRequest;
+    private final HttpUriRequest request;
     private CloseableHttpResponse response;
     private final RequestBuilder requestBuilder;
 
     public BaseClientObject(BaseClientObjectBuilder builder) {
         this.client = builder.client;
-        this.GETRequest = builder.GETRequest;
-        this.POSTRequest = builder.POSTRequest;
+        this.request = builder.request;
         this.requestBuilder = builder.requestBuilder;
     }
 
@@ -38,24 +33,13 @@ public class BaseClientObject {
         return response.getStatusLine().getStatusCode();
     }
 
-    public HttpUriRequest getGETRequest(){
-        return GETRequest;
-    }
-
-    public HttpUriRequest getPOSTRequest(){
-        return POSTRequest;
+    public HttpUriRequest getRequest(){
+        return request;
     }
 
     @SneakyThrows
-    public CloseableHttpResponse executeGetRequest(){
-        response = client.execute(GETRequest);
-
-        return response;
-    }
-
-    @SneakyThrows
-    public CloseableHttpResponse executePostRequest(){
-        response = client.execute(POSTRequest);
+    public CloseableHttpResponse executeRequest(){
+        response = client.execute(request);
 
         return response;
     }
@@ -74,8 +58,7 @@ public class BaseClientObject {
 
     public static class BaseClientObjectBuilder{
         private CloseableHttpClient client;
-        private HttpUriRequest GETRequest;
-        private HttpUriRequest POSTRequest;
+        private HttpUriRequest request;
         private RequestBuilder requestBuilder;
 
         public BaseClientObjectBuilder() {
@@ -87,26 +70,15 @@ public class BaseClientObject {
             return this;
         }
 
-        @SneakyThrows
-        public BaseClientObjectBuilder setGetRequest(String endpoint, String token, String... entity){
-            requestBuilder = RequestBuilder.get(endpoint)
-                    .setHeader(AUTHORIZATION, "Bearer " + token);
-
-            if(entity.length > 0) requestBuilder.setEntity(new StringEntity(entity[0]))
-                    .setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
-
-            GETRequest = requestBuilder.build();
-
-            return this;
-        }
-
-        public BaseClientObjectBuilder setPostRequest(String endpoint, Map<String, String> headersMap, StringEntity entity){
-            requestBuilder = RequestBuilder.post(endpoint)
-                    .setEntity(entity);
+        public BaseClientObjectBuilder setRequest(String endpoint, String method, Map<String, String> headersMap, HttpEntity... entity){
+            requestBuilder = RequestBuilder.create(method)
+                    .setUri(endpoint);
 
             setHeaders(headersMap);
 
-            POSTRequest = requestBuilder.build();
+            if(entity.length > 0) requestBuilder.setEntity(entity[0]);
+
+            request = requestBuilder.build();
 
             return this;
         }
