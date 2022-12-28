@@ -5,7 +5,9 @@ import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
 import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.LoggerFactory;
 
@@ -43,24 +45,18 @@ public class Authenticator {
         return getBearerTokenForScope("write", builder);
     }
 
-    private Map<String, String> setHeadersMapForOauth(){
-        Map<String, String> headersMap = new HashMap<>();
-        headersMap.put(AUTHORIZATION, "Basic " + getEncodedBasicAuthData());
-        headersMap.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
-
-        return headersMap;
-    }
-
     @SneakyThrows
     private String getBearerTokenForScope(String scope, BaseClientObjectBuilder builder){
-        BaseClientObject baseClient = builder.setAuthorizationRequest(oauthUrl, getAuthForm(scope), setHeadersMapForOauth())
+        StringEntity entity = new UrlEncodedFormEntity(getAuthForm(scope), "utf-8");
+
+        BaseClientObject baseClient = builder.setPostRequest(oauthUrl, setHeadersMap(), entity)
                 .build();
 
         logger.info("Request: {}", baseClient.getPOSTRequest());
 
         CloseableHttpResponse response = baseClient.executePostRequest();
 
-        String responseBody = baseClient.getResponseBody();
+        String responseBody = baseClient.getResponseBody(response);
 
         logger.info("Response: {}", response);
 
@@ -90,5 +86,14 @@ public class Authenticator {
 
     private Token getToken(String responseBody){
         return getTokenObj(responseBody);
+    }
+
+    private Map<String, String> setHeadersMap(){
+        Map<String, String> headersMap = new HashMap<>();
+
+        headersMap.put(AUTHORIZATION, "Basic " + getEncodedBasicAuthData());
+        headersMap.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
+
+        return headersMap;
     }
 }

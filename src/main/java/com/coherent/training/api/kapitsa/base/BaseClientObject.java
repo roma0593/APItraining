@@ -1,33 +1,33 @@
 package com.coherent.training.api.kapitsa.base;
 
 import lombok.SneakyThrows;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
-import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
 public class BaseClientObject {
     private final CloseableHttpClient client;
-    private final HttpGet getRequest;
-    private final HttpPost postRequest;
+    private final HttpUriRequest GETRequest;
+    private final HttpUriRequest POSTRequest;
     private CloseableHttpResponse response;
+    private final RequestBuilder requestBuilder;
 
     public BaseClientObject(BaseClientObjectBuilder builder) {
         this.client = builder.client;
-        this.getRequest = builder.getRequest;
-        this.postRequest = builder.postRequest;
+        this.GETRequest = builder.GETRequest;
+        this.POSTRequest = builder.POSTRequest;
+        this.requestBuilder = builder.requestBuilder;
     }
 
     public CloseableHttpClient getClient(){
@@ -38,42 +38,45 @@ public class BaseClientObject {
         return response.getStatusLine().getStatusCode();
     }
 
-    public HttpGet getGETRequest(){
-        return getRequest;
+    public HttpUriRequest getGETRequest(){
+        return GETRequest;
     }
 
-    public HttpPost getPOSTRequest(){
-        return postRequest;
+    public HttpUriRequest getPOSTRequest(){
+        return POSTRequest;
     }
 
     @SneakyThrows
     public CloseableHttpResponse executeGetRequest(){
-        response = client.execute(getRequest);
+        response = client.execute(GETRequest);
 
         return response;
     }
 
     @SneakyThrows
     public CloseableHttpResponse executePostRequest(){
-        response = client.execute(postRequest);
+        response = client.execute(POSTRequest);
 
         return response;
     }
 
     @SneakyThrows
-    public String getResponseBody(){
-        return EntityUtils.toString(response.getEntity(), UTF_8);
+    public <T extends HttpResponse> String getResponseBody(T httpData){
+        return EntityUtils.toString(httpData.getEntity(), UTF_8);
     }
 
     @SneakyThrows
     public String getRequestBody(){
-        return EntityUtils.toString(postRequest.getEntity());
+        HttpEntity entity = requestBuilder.getEntity();
+
+        return EntityUtils.toString(entity, UTF_8);
     }
 
     public static class BaseClientObjectBuilder{
         private CloseableHttpClient client;
-        private HttpGet getRequest;
-        private HttpPost postRequest;
+        private HttpUriRequest GETRequest;
+        private HttpUriRequest POSTRequest;
+        private RequestBuilder requestBuilder;
 
         public BaseClientObjectBuilder() {
         }
@@ -84,51 +87,33 @@ public class BaseClientObject {
             return this;
         }
 
-        public BaseClientObjectBuilder setGetRequest(String endpoint, String token){
-            getRequest = new HttpGet(endpoint);
-
-            getRequest.setHeader(AUTHORIZATION, "Bearer " + token);
-
-            return this;
-        }
-
-        public BaseClientObjectBuilder setPostRequest(String endpoint, String bodyValue, String token){
-            postRequest = new HttpPost(endpoint);
-            Map<String, String> headersMap = new HashMap<>();
-
-            headersMap.put(AUTHORIZATION, "Bearer " + token);
-            headersMap.put(CONTENT_TYPE, "application/json");
-
-            setPostRequestHeaders(headersMap);
-            setRequestBody(bodyValue);
-
-            return this;
-        }
-
-        public BaseClientObjectBuilder setAuthorizationRequest(String endpoint, List<NameValuePair> nameValuePairs, Map<String, String> headersMap){
-            postRequest = new HttpPost(endpoint);
-
-            setPostRequestHeaders(headersMap);
-            setEncodedRequestBody(nameValuePairs);
-
-            return this;
-        }
-
         @SneakyThrows
-        private void setRequestBody(String json){
-            StringEntity entity = new StringEntity(json);
+        public BaseClientObjectBuilder setGetRequest(String endpoint, String token, String... entity){
+            requestBuilder = RequestBuilder.get(endpoint)
+                    .setHeader(AUTHORIZATION, "Bearer " + token);
 
-            postRequest.setEntity(entity);
+            if(entity.length > 0) requestBuilder.setEntity(new StringEntity(entity[0]))
+                    .setHeader(HttpHeaders.CONTENT_TYPE, "application/json");
+
+            GETRequest = requestBuilder.build();
+
+            return this;
         }
 
-        @SneakyThrows
-        private void setEncodedRequestBody(List<NameValuePair> nameValuePairs){
-            postRequest.setEntity(new UrlEncodedFormEntity(nameValuePairs, "utf-8"));
+        public BaseClientObjectBuilder setPostRequest(String endpoint, Map<String, String> headersMap, StringEntity entity){
+            requestBuilder = RequestBuilder.post(endpoint)
+                    .setEntity(entity);
+
+            setHeaders(headersMap);
+
+            POSTRequest = requestBuilder.build();
+
+            return this;
         }
 
-        private void setPostRequestHeaders(Map<String, String> headersMap){
+        private void setHeaders(Map<String, String> headersMap){
             for(String key : headersMap.keySet()){
-                postRequest.setHeader(key, headersMap.get(key));
+                requestBuilder.setHeader(key, headersMap.get(key));
             }
         }
 
