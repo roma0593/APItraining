@@ -18,7 +18,6 @@ import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
 import static com.coherent.training.api.kapitsa.util.DataHandler.getTokenObj;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.apache.http.HttpStatus.SC_OK;
 
 public class Authenticator {
     private static final String CLIENT_ID = ConfigFileReader.getInstance().getClientId();
@@ -61,12 +60,9 @@ public class Authenticator {
 
         logger.info("Response: {}", response);
 
-        int responseCode = baseClient.getResponseCode();
-
         response.close();
 
-        if(responseCode == SC_OK) return getToken(responseBody).getAccessToken();
-        else throw new RuntimeException("Access token has not been returned");
+        return getToken(responseBody).getAccessToken();
     }
 
     private List<NameValuePair> getAuthForm(String authScope){

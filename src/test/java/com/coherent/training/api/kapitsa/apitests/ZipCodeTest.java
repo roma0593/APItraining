@@ -4,6 +4,8 @@ import com.coherent.training.api.kapitsa.clients.ZipCode;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.List;
+
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.testng.Assert.assertEquals;
@@ -14,15 +16,13 @@ public class ZipCodeTest extends BaseTest {
     public void getAllZipCodesTest(){
         zipCodeClient = new ZipCode(client);
 
-        String zipCodes = zipCodeClient.getAllZipCodes();
+        List<String> zipCodes = zipCodeClient.getAllZipCodes();
 
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
 
-        zipCodesArray = zipCodeClient.getArrayFromResponse(zipCodes);
-
         zipCodeClient.closeResponse();
 
-        assertTrue(zipCodesArray.length > 0, "There are no saved zip codes");
+        assertTrue(zipCodes.size() > 0, "There are no saved zip codes");
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
     }
@@ -32,13 +32,11 @@ public class ZipCodeTest extends BaseTest {
     public void addZipCodesTest(String zipCode1, String zipCode2, String zipCode3){
         zipCodeClient = new ZipCode(client);
 
-        String returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode2, zipCode3);
+        List<String> returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode2, zipCode3);
 
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
 
-        zipCodesArray = zipCodeClient.getArrayFromResponse(returnedZipCodes);
-
-        boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesArray, zipCode1, zipCode2, zipCode3);
+        boolean areSaved = zipCodeClient.zipCodesAreSaved(returnedZipCodes, zipCode1, zipCode2, zipCode3);
 
         zipCodeClient.closeResponse();
 
@@ -51,14 +49,12 @@ public class ZipCodeTest extends BaseTest {
     public void addDuplicatedZipCodesTest(String zipCode2, String zipCode4){
         zipCodeClient = new ZipCode(client);
 
-        String returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode4, zipCode2, zipCode2);
+        List<String> zipCodesList = zipCodeClient.addNewZipCodes(zipCode4, zipCode2, zipCode2);
 
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
 
-        zipCodesArray = zipCodeClient.getArrayFromResponse(returnedZipCodes);
-
-        boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesArray, zipCode4, zipCode2, zipCode2);
-        boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesArray, zipCode4, zipCode2, zipCode2);
+        boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesList, zipCode4, zipCode2, zipCode2);
+        boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesList, zipCode4, zipCode2, zipCode2);
 
         zipCodeClient.closeResponse();
 
@@ -72,14 +68,12 @@ public class ZipCodeTest extends BaseTest {
     public void addZipCodesAsAlreadySaved(String zipCode1, String zipCode5){
         zipCodeClient = new ZipCode(client);
 
-        String returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode5);
+        List<String> returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode5);
 
         int responseCode = zipCodeClient.getStatusCodeOfResponse();
 
-        zipCodesArray = zipCodeClient.getArrayFromResponse(returnedZipCodes);
-
-        boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesArray, zipCode1, zipCode5);
-        boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesArray, zipCode1, zipCode5);
+        boolean areSaved = zipCodeClient.zipCodesAreSaved(returnedZipCodes, zipCode1, zipCode5);
+        boolean areUnique = zipCodeClient.isZipCodesUnique(returnedZipCodes, zipCode1, zipCode5);
 
         assertTrue(areSaved, "Not all zip codes are saved");
         assertTrue(areUnique, "Duplicated zip codes present in response");

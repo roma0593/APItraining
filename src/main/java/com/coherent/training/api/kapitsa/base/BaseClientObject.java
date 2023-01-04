@@ -46,7 +46,10 @@ public class BaseClientObject {
 
     @SneakyThrows
     public <T extends HttpResponse> String getResponseBody(T httpData){
-        return EntityUtils.toString(httpData.getEntity(), UTF_8);
+        String responseCode = String.valueOf(getResponseCode());
+
+        if (responseCode.startsWith("2")) return EntityUtils.toString(httpData.getEntity(), UTF_8);
+        else throw new RuntimeException("Response body is not returned due to invalid status code");
     }
 
     @SneakyThrows
