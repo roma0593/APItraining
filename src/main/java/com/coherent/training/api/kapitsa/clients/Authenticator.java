@@ -1,36 +1,33 @@
 package com.coherent.training.api.kapitsa.clients;
 
+import com.coherent.training.api.kapitsa.base.BaseClientObject;
 import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
+import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
-import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
+import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
 
-import static com.coherent.training.api.kapitsa.base.BaseTest.client;
+import static com.coherent.training.api.kapitsa.base.BaseClientObject.BaseClientObjectBuilder;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
-import static java.util.logging.Logger.*;
+import static com.coherent.training.api.kapitsa.util.DataHandler.getTokenObj;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
 public class Authenticator {
     private static final String CLIENT_ID = ConfigFileReader.getInstance().getClientId();
     private static final String CLIENT_SECRET = ConfigFileReader.getInstance().getClientSecret();
-    private static final String oauthUrl = OAUTH_URL.getUrl();
-    private static final Logger LOGGER = getLogger(Authenticator.class.getName());
+    private static final String oauthUrl = OAUTH_URL.getEndpoint();
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
+    private static final String POST = "POST";
 
-    private Authenticator() {}
+    private Authenticator(){
+    }
 
     private static class SingletonAuthenticator{
         private static final Authenticator INSTANCE = new Authenticator();
@@ -40,37 +37,32 @@ public class Authenticator {
         return SingletonAuthenticator.INSTANCE;
     }
 
-    public String getBearerTokenForReadScope(){
-        return getBearerTokenForScope("read");
+    public String getBearerTokenForReadScope(BaseClientObjectBuilder builder){
+        return getBearerTokenForScope("read", builder);
     }
 
-    public String getBearerTokenForWriteScope(){
-        return getBearerTokenForScope("write");
+    public String getBearerTokenForWriteScope(BaseClientObjectBuilder builder){
+        return getBearerTokenForScope("write", builder);
     }
 
     @SneakyThrows
-    private String getBearerTokenForScope(String scope){
-        HttpPost postRequest = new HttpPost(oauthUrl);
+    private String getBearerTokenForScope(String scope, BaseClientObjectBuilder builder){
+        StringEntity entity = new UrlEncodedFormEntity(getAuthForm(scope), "utf-8");
 
-        postRequest.setHeader(AUTHORIZATION, "Basic " + getEncodedBasicAuthData());
-        postRequest.setHeader(CONTENT_TYPE, "application/x-www-form-urlencoded");
-        postRequest.setEntity(new UrlEncodedFormEntity(getAuthForm(scope), "utf-8"));
+        BaseClientObject baseClient = builder.setRequest(oauthUrl, POST, setHeadersMap(), entity)
+                .build();
 
-        LOGGER.log(Level.INFO, "Request: " + postRequest);
+        logger.info("Request: {}", baseClient.getRequest());
 
-        CloseableHttpResponse response = client.execute(postRequest);
+        CloseableHttpResponse response = baseClient.executeRequest();
 
-        String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+        String responseBody = baseClient.getResponseBody(response);
 
-        LOGGER.log(Level.INFO, "Response: " + response);
-
-        int statusCode = response.getStatusLine().getStatusCode();
+        logger.info("Response: {}", response);
 
         response.close();
 
-        if(statusCode == HttpStatus.SC_OK) return new JSONObject(responseBody).getString("access_token");
-
-        else throw new RuntimeException("Access toke is not returned because status code is not 200");
+        return getToken(responseBody).getAccessToken();
     }
 
     private List<NameValuePair> getAuthForm(String authScope){
@@ -87,5 +79,18 @@ public class Authenticator {
         String keys = CLIENT_ID + ":" + CLIENT_SECRET;
 
         return Base64.getEncoder().encodeToString(keys.getBytes());
+    }
+
+    private Token getToken(String responseBody){
+        return getTokenObj(responseBody);
+    }
+
+    private Map<String, String> setHeadersMap(){
+        Map<String, String> headersMap = new HashMap<>();
+
+        headersMap.put(AUTHORIZATION, "Basic " + getEncodedBasicAuthData());
+        headersMap.put(CONTENT_TYPE, "application/x-www-form-urlencoded");
+
+        return headersMap;
     }
 }
