@@ -6,6 +6,7 @@ import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.LoggerFactory;
@@ -52,13 +53,13 @@ public class Authenticator {
 
         logger.info("Request: {}", baseClient.getRequest());
 
-        baseClient.executeRequest();
+        CloseableHttpResponse response = baseClient.executeRequest();
 
-        Token responseBody = baseClient.getResponseBody(Token.class);
+        Token responseBody = baseClient.getSuccessResponseBody(Token.class, response);
 
-        logger.info("Response: {}, {}",baseClient.getResponse(), responseBody);
+        logger.info("Response: {}, {}", response, responseBody);
 
-        baseClient.closeResponse();
+        baseClient.closeResponse(response);
 
         return responseBody.getAccessToken();
     }

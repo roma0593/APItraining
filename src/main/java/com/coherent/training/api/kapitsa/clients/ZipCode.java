@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.coherent.training.api.kapitsa.providers.Scope.READ;
+import static com.coherent.training.api.kapitsa.providers.Scope.WRITE;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.EXPAND_ZIP_CODES;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.GET_ZIP_CODES;
 
@@ -22,17 +24,17 @@ public class ZipCode extends BaseClient {
 
     @SneakyThrows
     public List<String> getAllZipCodes() {
-        baseClient = builder.setRequest(GET_ZIP_CODES_URL, GET, setHeadersMap("read")).build();
+        baseClient = builder.setRequest(GET_ZIP_CODES_URL, GET, setHeadersMap(READ)).build();
 
         logger.info("Request: {}", baseClient.getRequest());
 
-        baseClient.executeRequest();
+        response = baseClient.executeRequest();
 
         List<String> responseBody = getListFromResponse();
 
-        baseClient.closeResponse();
+        logger.info("Response: {}", response + "\n" + responseBody);
 
-        logger.info("Response: {}", baseClient.getResponse() + "\n" + responseBody);
+        baseClient.closeResponse(response);
 
         return responseBody;
     }
@@ -41,24 +43,24 @@ public class ZipCode extends BaseClient {
     public List<String> addNewZipCodes(String... zipCodes) {
         StringEntity entity = new StringEntity(Arrays.toString(zipCodes));
 
-        baseClient = builder.setRequest(EXPAND_ZIP_CODES_URL, POST, setHeadersMap("write"), entity)
+        baseClient = builder.setRequest(EXPAND_ZIP_CODES_URL, POST, setHeadersMap(WRITE), entity)
                 .build();
 
         logger.info("Request: {}", baseClient.getRequest() + "\n" + baseClient.getRequestBody(List.class));
 
-        baseClient.executeRequest();
+        response = baseClient.executeRequest();
 
         List<String> listOfCodes = getListFromResponse();
 
-        baseClient.closeResponse();
+        logger.info("Response: {}", response + "\n" + listOfCodes);
 
-        logger.info("Response: {}", baseClient.getResponse() + "\n" + listOfCodes);
+        baseClient.closeResponse(response);
 
         return listOfCodes;
     }
 
     private List<String> getListFromResponse() {
-        return baseClient.getResponseBody(List.class);
+        return baseClient.getSuccessResponseBody(List.class, response);
     }
 
     public boolean zipCodesAreSaved(List<String> responseList, String... zipCodes) {

@@ -17,7 +17,6 @@ public class BaseClientObject {
     private final DataHandler handler = new DataHandler();
     private final CloseableHttpClient client;
     private final HttpUriRequest request;
-    private CloseableHttpResponse response;
     private final RequestBuilder requestBuilder;
 
     public BaseClientObject(BaseClientObjectBuilder builder) {
@@ -30,7 +29,7 @@ public class BaseClientObject {
         return client;
     }
 
-    public int getResponseCode() {
+    public int getResponseCode(CloseableHttpResponse response) {
         return response.getStatusLine().getStatusCode();
     }
 
@@ -38,20 +37,25 @@ public class BaseClientObject {
         return request;
     }
 
-    public CloseableHttpResponse getResponse(){
-        return response;
+    @SneakyThrows
+    public CloseableHttpResponse executeRequest() {
+        return client.execute(request);
     }
 
     @SneakyThrows
-    public void executeRequest() {
-        response = client.execute(request);
-    }
-
-    @SneakyThrows
-    public <G> G getResponseBody(Class<G> gClass) {
+    public <T extends Object> T getSuccessResponseBody(Class<T> gClass, CloseableHttpResponse response) {
+        String responseCode = String.valueOf(getResponseCode(response));
         String responseAsString = EntityUtils.toString(response.getEntity(), UTF_8);
 
-        return handler.getObject(responseAsString, gClass);
+        if(responseCode.startsWith("2")) return handler.getObject(responseAsString, gClass);
+        else throw new RuntimeException("Response code " + responseCode + " is not success");
+    }
+
+    public HttpEntity getBadRequestBody(CloseableHttpResponse response){
+        String responseCode = String.valueOf(getResponseCode(response));
+
+        if(!responseCode.startsWith("2")) return response.getEntity();
+        else throw new RuntimeException("Response code " + responseCode + " is success");
     }
 
     @SneakyThrows
@@ -64,7 +68,7 @@ public class BaseClientObject {
     }
 
     @SneakyThrows
-    public void closeResponse(){
+    public void closeResponse(CloseableHttpResponse response){
         response.close();
     }
 

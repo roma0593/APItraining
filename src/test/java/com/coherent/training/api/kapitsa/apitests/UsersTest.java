@@ -12,6 +12,9 @@ import static org.apache.http.HttpStatus.*;
 import static org.testng.Assert.*;
 
 public class UsersTest extends BaseTest {
+    private Users usersClient;
+    private ZipCode zipCodeClient;
+
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void addUserWithAllFields(String usersJson) {
         usersClient = new Users(client);

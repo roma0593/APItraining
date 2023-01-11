@@ -6,10 +6,10 @@ import org.testng.annotations.DataProvider;
 import java.io.File;
 
 public class DataUtilization {
-    private static final String ALL_FIELDS_USER = "src/test/resources/test_data/all_fields_user.json";
-    private static final String REQUIRED_FIELDS_USER = "src/test/resources/test_data/required_fields_user.json";
-    private static final String INVALID_ZIPCODE_USER = "src/test/resources/test_data/user_with_invalid_zip_code.json";
-    private static final String INVALID_NAME_SEX_USER = "src/test/resources/test_data/invalid_namesex_pair_user.json";
+    private static final String ALL_FIELDS_USER = "src/test/resources/test_data/users/all_fields_user.json";
+    private static final String REQUIRED_FIELDS_USER = "src/test/resources/test_data/users/required_fields_user.json";
+    private static final String INVALID_ZIPCODE_USER = "src/test/resources/test_data/users/user_with_invalid_zip_code.json";
+    private static final String INVALID_NAME_SEX_USER = "src/test/resources/test_data/users/invalid_namesex_pair_user.json";
     private static final JsonParser jsonParser = new JsonParser();
 
     @DataProvider(name = "allFieldsUserProvider")

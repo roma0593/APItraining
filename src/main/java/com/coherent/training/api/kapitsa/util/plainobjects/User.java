@@ -7,13 +7,9 @@ import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
-    @JsonProperty("age")
     private int age;
-    @JsonProperty("name")
     private String name;
-    @JsonProperty("sex")
     private String sex;
-    @JsonProperty("zipCode")
     private String zipCode;
 
     public User() {

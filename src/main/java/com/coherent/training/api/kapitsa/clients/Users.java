@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.coherent.training.api.kapitsa.providers.Scope.READ;
+import static com.coherent.training.api.kapitsa.providers.Scope.WRITE;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.USERS;
 
 public class Users extends BaseClient{
@@ -22,31 +24,34 @@ public class Users extends BaseClient{
     @SneakyThrows
     public User addUser(String userJson){
         StringEntity entity = new StringEntity(userJson);
-        baseClient = builder.setRequest(USERS_ENDPOINT, POST, setHeadersMap("write"), entity).build();
+
+        baseClient = builder.setRequest(USERS_ENDPOINT, POST, setHeadersMap(WRITE), entity).build();
 
         User requestBody = baseClient.getRequestBody(User.class);
 
         logger.info("Request: {}", baseClient.getRequest() + "\n" + requestBody);
 
-        baseClient.executeRequest();
+        response = baseClient.executeRequest();
 
-        logger.info("Response: {}", baseClient.getResponse());
+        logger.info("Response: {}", response);
 
-        baseClient.closeResponse();
+        baseClient.closeResponse(response);
 
         return requestBody;
     }
 
     public List<User> getAllUsers(){
-        baseClient = builder.setRequest(USERS_ENDPOINT, GET, setHeadersMap("read")).build();
+        baseClient = builder.setRequest(USERS_ENDPOINT, GET, setHeadersMap(READ)).build();
 
         logger.info("Request: {}", baseClient.getRequest());
 
-        baseClient.executeRequest();
+        response = baseClient.executeRequest();
 
-        User[] userArray = baseClient.getResponseBody(User[].class);
+        User[] userArray = baseClient.getSuccessResponseBody(User[].class, response);
 
-        logger.info("Response: {}, {}", baseClient.getResponse(), Arrays.toString(userArray));
+        logger.info("Response: {}, {}", response, Arrays.toString(userArray));
+
+        baseClient.closeResponse(response);
 
         return Arrays.asList(userArray);
     }

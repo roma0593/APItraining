@@ -4,34 +4,34 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Token {
     @JsonProperty("access_token")
-    private String access_token;
+    private String accessToken;
     @JsonProperty("token_type")
-    private String token_type;
+    private String tokenType;
     @JsonProperty("expires_in")
-    private String expires_in;
+    private String expiresIn;
     @JsonProperty("scope")
     private String scope;
 
     public Token() {
     }
 
-    public Token(String access_token, String token_type, String expires_in, String scope) {
-        this.access_token = access_token;
-        this.token_type = token_type;
-        this.expires_in = expires_in;
+    public Token(String accessToken, String tokenType, String expiresIn, String scope) {
+        this.accessToken = accessToken;
+        this.tokenType = tokenType;
+        this.expiresIn = expiresIn;
         this.scope = scope;
     }
 
     public String getAccessToken() {
-        return access_token;
+        return accessToken;
     }
 
     public String getTokenType() {
-        return token_type;
+        return tokenType;
     }
 
-    public String getExpires_in() {
-        return expires_in;
+    public String getExpiresIn() {
+        return expiresIn;
     }
 
     public String getScope() {
@@ -41,9 +41,9 @@ public class Token {
     @Override
     public String toString() {
         return "Token{" +
-                "access_token='" + access_token + '\'' +
-                ", token_type='" + token_type + '\'' +
-                ", expires_in='" + expires_in + '\'' +
+                "accessToken='" + accessToken + '\'' +
+                ", tokenType='" + tokenType + '\'' +
+                ", expiresIn='" + expiresIn + '\'' +
                 ", scope='" + scope + '\'' +
                 '}';
     }

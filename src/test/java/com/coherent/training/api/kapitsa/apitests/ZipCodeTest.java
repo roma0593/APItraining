@@ -12,6 +12,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 public class ZipCodeTest extends BaseTest {
+    private ZipCode zipCodeClient;
+
     @Test
     public void getAllZipCodesTest(){
         zipCodeClient = new ZipCode(client);
