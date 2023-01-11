@@ -18,9 +18,7 @@ public class ZipCodeTest extends BaseTest {
 
         List<String> zipCodes = zipCodeClient.getAllZipCodes();
 
-        int responseCode = zipCodeClient.getStatusCodeOfResponse();
-
-        zipCodeClient.closeResponse();
+        responseCode = zipCodeClient.getStatusCodeOfResponse();
 
         assertTrue(zipCodes.size() > 0, "There are no saved zip codes");
 
@@ -34,11 +32,9 @@ public class ZipCodeTest extends BaseTest {
 
         List<String> returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode2, zipCode3);
 
-        int responseCode = zipCodeClient.getStatusCodeOfResponse();
+        responseCode = zipCodeClient.getStatusCodeOfResponse();
 
         boolean areSaved = zipCodeClient.zipCodesAreSaved(returnedZipCodes, zipCode1, zipCode2, zipCode3);
-
-        zipCodeClient.closeResponse();
 
         assertTrue(areSaved, "Not all zip codes are saved");
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
@@ -51,12 +47,10 @@ public class ZipCodeTest extends BaseTest {
 
         List<String> zipCodesList = zipCodeClient.addNewZipCodes(zipCode4, zipCode2, zipCode2);
 
-        int responseCode = zipCodeClient.getStatusCodeOfResponse();
+        responseCode = zipCodeClient.getStatusCodeOfResponse();
 
         boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesList, zipCode4, zipCode2, zipCode2);
         boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesList, zipCode4, zipCode2, zipCode2);
-
-        zipCodeClient.closeResponse();
 
         assertTrue(areSaved, "Not all zip codes are saved");
         assertTrue(areUnique, "Duplicated zip codes present in response");
@@ -70,7 +64,7 @@ public class ZipCodeTest extends BaseTest {
 
         List<String> returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode5);
 
-        int responseCode = zipCodeClient.getStatusCodeOfResponse();
+        responseCode = zipCodeClient.getStatusCodeOfResponse();
 
         boolean areSaved = zipCodeClient.zipCodesAreSaved(returnedZipCodes, zipCode1, zipCode5);
         boolean areUnique = zipCodeClient.isZipCodesUnique(returnedZipCodes, zipCode1, zipCode5);

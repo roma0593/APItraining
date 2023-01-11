@@ -6,7 +6,6 @@ import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,6 @@ import java.util.*;
 
 import static com.coherent.training.api.kapitsa.base.BaseClientObject.BaseClientObjectBuilder;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
-import static com.coherent.training.api.kapitsa.util.DataHandler.getTokenObj;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
@@ -23,7 +21,7 @@ public class Authenticator {
     private static final String CLIENT_ID = ConfigFileReader.getInstance().getClientId();
     private static final String CLIENT_SECRET = ConfigFileReader.getInstance().getClientSecret();
     private static final String oauthUrl = OAUTH_URL.getEndpoint();
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
+    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(Authenticator.class.getSimpleName());
     private static final String POST = "POST";
 
     private Authenticator(){
@@ -54,15 +52,15 @@ public class Authenticator {
 
         logger.info("Request: {}", baseClient.getRequest());
 
-        CloseableHttpResponse response = baseClient.executeRequest();
+        baseClient.executeRequest();
 
-        String responseBody = baseClient.getResponseBody(response);
+        Token responseBody = baseClient.getResponseBody(Token.class);
 
-        logger.info("Response: {}", response);
+        logger.info("Response: {}, {}",baseClient.getResponse(), responseBody);
 
-        response.close();
+        baseClient.closeResponse();
 
-        return getToken(responseBody).getAccessToken();
+        return responseBody.getAccessToken();
     }
 
     private List<NameValuePair> getAuthForm(String authScope){
@@ -79,10 +77,6 @@ public class Authenticator {
         String keys = CLIENT_ID + ":" + CLIENT_SECRET;
 
         return Base64.getEncoder().encodeToString(keys.getBytes());
-    }
-
-    private Token getToken(String responseBody){
-        return getTokenObj(responseBody);
     }
 
     private Map<String, String> setHeadersMap(){

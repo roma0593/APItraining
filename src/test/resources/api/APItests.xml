@@ -11,4 +11,10 @@
             <class name="com.coherent.training.api.kapitsa.apitests.ZipCodeTest"/>
         </classes>
     </test>
+
+    <test name="Users API code">
+        <classes>
+            <class name="com.coherent.training.api.kapitsa.apitests.UsersTest"/>
+        </classes>
+    </test>
 </suite>
