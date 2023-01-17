@@ -13,4 +13,9 @@ public class DataHandler {
 
         return mapper.readValue(json, tClass);
     }
+
+    @SneakyThrows
+    public <T> String convertToJson(T tClass){
+        return mapper.writeValueAsString(tClass);
+    }
 }

@@ -13,26 +13,12 @@ public class JsonParser {
 
 
     @SneakyThrows
-    public <T> String[] getDataFromJson(File file, Class<T[]> tClass) {
+    public <T> T[] getDataFromJson(File file, Class<T[]> tClass) {
         try(BufferedReader reader = new BufferedReader(new FileReader(file))) {
 
             mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
 
-            T[] dataArray = mapper.readValue(reader, tClass);
-
-            return getJsonAsString(dataArray);
+            return mapper.readValue(reader, tClass);
         }
-    }
-
-    @SneakyThrows
-    private <T> String[] getJsonAsString(T[] objects){
-        String[] jsonArray = new String[objects.length];
-        int index = 0;
-
-        for (T object : objects){
-            jsonArray[index++] = mapper.writeValueAsString(object);
-        }
-
-        return jsonArray;
     }
 }

@@ -1,9 +1,14 @@
 package com.coherent.training.api.kapitsa.utils;
 
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
+import org.apache.commons.lang3.StringUtils;
 import org.testng.annotations.DataProvider;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class DataUtilization {
     private static final String ALL_FIELDS_USER = "src/test/resources/test_data/users/all_fields_user.json";
@@ -33,16 +38,49 @@ public class DataUtilization {
     }
 
     private static Object[][] userProvider(String path){
-        String[] usersJson = jsonParser.getDataFromJson(new File(path), User[].class);
+        User[] users = jsonParser.getDataFromJson(new File(path), User[].class);
 
-        String[][] dataArray = new String[usersJson.length][1];
+        String[][] dataArray = new String[users.length][4];
+
+        String age, name, sex, zipCode;
 
         int arrayIndex = 0;
 
-        for (String userJson : usersJson){
-            dataArray[arrayIndex++][0] = userJson;
+        for (User user : users){
+            name = user.getName();
+            age = String.valueOf(user.getAge());
+            sex = user.getSex();
+            zipCode = user.getZipCode();
+
+            List<String> userFields = Arrays.asList(age, name, sex, zipCode);
+
+            int userId = 0;
+
+            for(String value : userFields){
+                if (StringUtils.isNotBlank(value)) {
+                    dataArray[arrayIndex][userId++] = value;
+                }
+            }
+
+            arrayIndex++;
         }
 
-        return dataArray;
+        return filterNullsInInnerArray(dataArray);
+    }
+
+    private static Object[] filterNulls(Object[] arr){
+        return Arrays.stream(arr).filter(Objects::nonNull)
+                .filter(obj -> !obj.equals("0"))
+                .toArray();
+    }
+
+    private static Object[][] filterNullsInInnerArray(Object[][] arr){
+        List<Object[]> outerList = new ArrayList<>(arr.length);
+
+        for (Object[] inner : arr) {
+            outerList.add(filterNulls(inner));
+        }
+
+        return outerList.toArray(new Object[outerList.size()][]);
     }
 }

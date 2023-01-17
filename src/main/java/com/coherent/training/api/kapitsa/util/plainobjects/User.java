@@ -1,7 +1,6 @@
 package com.coherent.training.api.kapitsa.util.plainobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
@@ -20,6 +19,11 @@ public class User {
         this.name = name;
         this.sex = sex;
         this.zipCode = zipCode;
+    }
+
+    public User(String name, String sex) {
+        this.name = name;
+        this.sex = sex;
     }
 
     public int getAge() {

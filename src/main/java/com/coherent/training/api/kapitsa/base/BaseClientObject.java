@@ -3,26 +3,29 @@ package com.coherent.training.api.kapitsa.base;
 import com.coherent.training.api.kapitsa.util.DataHandler;
 import lombok.SneakyThrows;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
 import java.util.Map;
 
+import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.*;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class BaseClientObject {
     private final DataHandler handler = new DataHandler();
     private final CloseableHttpClient client;
-    private final HttpUriRequest request;
-    private final RequestBuilder requestBuilder;
+    private HttpUriRequest request;
+    private RequestBuilder requestBuilder;
+    private static final String POST = "POST";
+    private static final String GET = "GET";
 
-    public BaseClientObject(BaseClientObjectBuilder builder) {
-        this.client = builder.client;
-        this.request = builder.request;
-        this.requestBuilder = builder.requestBuilder;
+    public BaseClientObject(CloseableHttpClient client) {
+        this.client = client;
     }
 
     public CloseableHttpClient getClient() {
@@ -38,24 +41,16 @@ public class BaseClientObject {
     }
 
     @SneakyThrows
-    public CloseableHttpResponse executeRequest() {
-        return client.execute(request);
-    }
-
-    @SneakyThrows
     public <T extends Object> T getSuccessResponseBody(Class<T> gClass, CloseableHttpResponse response) {
         String responseCode = String.valueOf(getResponseCode(response));
-        String responseAsString = EntityUtils.toString(response.getEntity(), UTF_8);
+        String responseAsString = getEntity();
 
-        if(responseCode.startsWith("2")) return handler.getObject(responseAsString, gClass);
+        if (responseCode.startsWith("2")) return handler.getObject(responseAsString, gClass);
         else throw new RuntimeException("Response code " + responseCode + " is not success");
     }
 
-    public HttpEntity getBadRequestBody(CloseableHttpResponse response){
-        String responseCode = String.valueOf(getResponseCode(response));
-
-        if(!responseCode.startsWith("2")) return response.getEntity();
-        else throw new RuntimeException("Response code " + responseCode + " is success");
+    public HttpEntity getBadResponseBody(CloseableHttpResponse response) {
+        return response.getEntity();
     }
 
     @SneakyThrows
@@ -68,45 +63,66 @@ public class BaseClientObject {
     }
 
     @SneakyThrows
-    public void closeResponse(CloseableHttpResponse response){
+    public void closeResponse(CloseableHttpResponse response) {
         response.close();
     }
 
-    public static class BaseClientObjectBuilder {
-        private CloseableHttpClient client;
-        private HttpUriRequest request;
-        private RequestBuilder requestBuilder;
+    private HttpUriRequest setRequest(String endpoint, String method, Map<String, String> headersMap, HttpEntity... entity) {
+        requestBuilder = RequestBuilder.create(method)
+                .setUri(endpoint);
 
-        public BaseClientObjectBuilder() {
+        setHeaders(headersMap);
+
+        if (entity.length > 0) requestBuilder.setEntity(entity[0]);
+
+        return requestBuilder.build();
+    }
+
+    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, HttpEntity entity, NameValuePair nvp) {
+        requestBuilder = RequestBuilder.create(method)
+                .setUri(endpoint)
+                .addParameter(nvp)
+                .setEntity(entity);
+
+        setHeaders(headersMap);
+
+        return requestBuilder.build();
+    }
+
+    private void setHeaders(Map<String, String> headersMap) {
+        for (String key : headersMap.keySet()) {
+            requestBuilder.setHeader(key, headersMap.get(key));
         }
+    }
 
-        public BaseClientObjectBuilder setClient(CloseableHttpClient client) {
-            this.client = client;
+    @SneakyThrows
+    public CloseableHttpResponse get(String url, Map<String, String> headers){
+        request = setRequest(url, GET, headers);
 
-            return this;
-        }
+        return client.execute(request);
+    }
 
-        public BaseClientObjectBuilder setRequest(String endpoint, String method, Map<String, String> headersMap, HttpEntity... entity) {
-            requestBuilder = RequestBuilder.create(method)
-                    .setUri(endpoint);
+    @SneakyThrows
+    public CloseableHttpResponse get(String url, Map<String, String> headers, HttpEntity entity){
+        request = setRequest(url, GET, headers, entity);
 
-            setHeaders(headersMap);
+        return client.execute(request);
+    }
 
-            if (entity.length > 0) requestBuilder.setEntity(entity[0]);
+    @SneakyThrows
+    public <T extends StringEntity> CloseableHttpResponse post(String url, Map<String, String> headers, T body){
+        request = setRequest(url, POST, headers, body);
 
-            request = requestBuilder.build();
+        return client.execute(request);
+    }
 
-            return this;
-        }
+    @SneakyThrows
+    public <T> CloseableHttpResponse post(String url, Map<String, String> headers, T bodyClass){
+        String json = handler.convertToJson(bodyClass);
+        HttpEntity entity = new StringEntity(json);
 
-        private void setHeaders(Map<String, String> headersMap) {
-            for (String key : headersMap.keySet()) {
-                requestBuilder.setHeader(key, headersMap.get(key));
-            }
-        }
+        request = setRequest(url, POST, headers, entity);
 
-        public BaseClientObject build() {
-            return new BaseClientObject(this);
-        }
+        return client.execute(request);
     }
 }

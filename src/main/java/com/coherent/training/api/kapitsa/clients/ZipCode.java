@@ -1,22 +1,18 @@
 package com.coherent.training.api.kapitsa.clients;
 
 import lombok.SneakyThrows;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
 import java.util.List;
 
-import static com.coherent.training.api.kapitsa.providers.Scope.READ;
-import static com.coherent.training.api.kapitsa.providers.Scope.WRITE;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.EXPAND_ZIP_CODES;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.GET_ZIP_CODES;
+import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
+import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
 
 public class ZipCode extends BaseClient {
     private static final String GET_ZIP_CODES_URL = GET_ZIP_CODES.getEndpoint();
     private static final String EXPAND_ZIP_CODES_URL = EXPAND_ZIP_CODES.getEndpoint();
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ZipCode.class.getSimpleName());
 
     public ZipCode(CloseableHttpClient client) {
         super(client);
@@ -24,39 +20,24 @@ public class ZipCode extends BaseClient {
 
     @SneakyThrows
     public List<String> getAllZipCodes() {
-        baseClient = builder.setRequest(GET_ZIP_CODES_URL, GET, setHeadersMap(READ)).build();
+        try {
+            response = baseClient.get(GET_ZIP_CODES_URL, setHeadersMap(READ));
 
-        logger.info("Request: {}", baseClient.getRequest());
-
-        response = baseClient.executeRequest();
-
-        List<String> responseBody = getListFromResponse();
-
-        logger.info("Response: {}", response + "\n" + responseBody);
-
-        baseClient.closeResponse(response);
-
-        return responseBody;
+            return getListFromResponse();
+        } finally {
+            baseClient.closeResponse(response);
+        }
     }
 
     @SneakyThrows
     public List<String> addNewZipCodes(String... zipCodes) {
-        StringEntity entity = new StringEntity(Arrays.toString(zipCodes));
+        try {
+            response = baseClient.post(EXPAND_ZIP_CODES_URL, setHeadersMap(WRITE), zipCodes);
 
-        baseClient = builder.setRequest(EXPAND_ZIP_CODES_URL, POST, setHeadersMap(WRITE), entity)
-                .build();
-
-        logger.info("Request: {}", baseClient.getRequest() + "\n" + baseClient.getRequestBody(List.class));
-
-        response = baseClient.executeRequest();
-
-        List<String> listOfCodes = getListFromResponse();
-
-        logger.info("Response: {}", response + "\n" + listOfCodes);
-
-        baseClient.closeResponse(response);
-
-        return listOfCodes;
+            return getListFromResponse();
+        } finally {
+            baseClient.closeResponse(response);
+        }
     }
 
     private List<String> getListFromResponse() {
