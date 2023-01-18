@@ -3,7 +3,8 @@ package com.coherent.training.api.kapitsa.providers;
 public enum UrlProvider {
     OAUTH_URL("/oauth/token"),
     GET_ZIP_CODES("/zip-codes"),
-    EXPAND_ZIP_CODES("/zip-codes/expand");
+    EXPAND_ZIP_CODES("/zip-codes/expand"),
+    USERS("/users");
 
     private static final String HOST_URL = ConfigFileReader.getInstance().getHostUrl();
 

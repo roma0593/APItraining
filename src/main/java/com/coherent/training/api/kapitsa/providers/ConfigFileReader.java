@@ -11,8 +11,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import static com.coherent.training.api.kapitsa.providers.ConfigProvider.*;
-import static com.coherent.training.api.kapitsa.providers.ConfigProvider.CLIENT_ID;
-import static com.coherent.training.api.kapitsa.providers.ConfigProvider.CLIENT_SECRET;
 
 public class ConfigFileReader {
     private Properties properties;

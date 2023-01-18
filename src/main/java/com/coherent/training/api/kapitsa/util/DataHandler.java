@@ -1,23 +1,21 @@
 package com.coherent.training.api.kapitsa.util;
 
-import com.coherent.training.api.kapitsa.util.plainobjects.Token;
-import com.google.gson.Gson;
-import org.openqa.selenium.json.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.SneakyThrows;
 
 public class DataHandler {
-    private static final Gson gson = new Gson();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    public static Token getTokenObj(String json){
-        return gson.fromJson(json, Token.class);
+    @SneakyThrows
+    public <T> T getObject(String json, Class<T> tClass){
+        mapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
+
+        return mapper.readValue(json, tClass);
     }
 
-    public static List<String> getListOfObj(String json){
-        Type stringListType = new TypeToken<ArrayList<String>>(){}.getType();
-
-        return gson.fromJson(json, stringListType);
+    @SneakyThrows
+    public <T> String convertToJson(T tClass){
+        return mapper.writeValueAsString(tClass);
     }
 }
