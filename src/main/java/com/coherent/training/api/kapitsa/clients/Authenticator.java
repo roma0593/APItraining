@@ -45,8 +45,8 @@ public class Authenticator {
     private String getBearerTokenForScope(String scope, CloseableHttpClient client) {
         BaseClientObject baseClient = new BaseClientObject(client);
 
-        try(CloseableHttpResponse response = baseClient.post(oauthUrl, setHeadersMap(), getFormEntity(scope))) {
-            Token token = baseClient.getSuccessResponseBody(Token.class, response);
+        try (CloseableHttpResponse response = baseClient.post(oauthUrl, setHeadersMap(), getFormEntity(scope))) {
+            Token token = baseClient.getResponseBody(Token.class, response);
 
             return token.getAccessToken();
         }

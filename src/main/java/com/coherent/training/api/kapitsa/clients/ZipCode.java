@@ -41,7 +41,7 @@ public class ZipCode extends BaseClient {
     }
 
     private List<String> getListFromResponse() {
-        return baseClient.getSuccessResponseBody(List.class, response);
+        return baseClient.getResponseBody(List.class, response);
     }
 
     public boolean zipCodesAreSaved(List<String> responseList, String... zipCodes) {

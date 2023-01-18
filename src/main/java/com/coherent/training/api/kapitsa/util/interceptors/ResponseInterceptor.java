@@ -1,9 +1,6 @@
 package com.coherent.training.api.kapitsa.util.interceptors;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpException;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpResponseInterceptor;
+import org.apache.http.*;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.LoggerFactory;
@@ -21,12 +18,16 @@ public class ResponseInterceptor implements HttpResponseInterceptor {
     }
 
     @Override
-    public void process(HttpResponse response, HttpContext context) throws HttpException, IOException {
+    public void process(HttpResponse response, HttpContext context) throws IOException {
         HttpEntity entity = response.getEntity();
-
         stringEntity = (entity != null) ? EntityUtils.toString(entity, UTF_8) : "{}";
 
-        logger.info("Response: {}", response.getStatusLine() + "\n"
-                + stringEntity);
+        logger.info("Response: {}", response.getStatusLine());
+
+        for(Header header : response.getAllHeaders()){
+            logger.info("{}: {}", header.getName(), header.getValue());
+        }
+
+        logger.info("{}", stringEntity);
     }
 }

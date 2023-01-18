@@ -33,7 +33,7 @@ public class Users extends BaseClient{
         try {
             response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ));
 
-            User[] userArray = baseClient.getSuccessResponseBody(User[].class, response);
+            User[] userArray = baseClient.getResponseBody(User[].class, response);
             return Arrays.asList(userArray);
         } finally {
             baseClient.closeResponse(response);

@@ -13,7 +13,7 @@ import org.apache.http.util.EntityUtils;
 
 import java.util.Map;
 
-import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.*;
+import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class BaseClientObject {
@@ -36,17 +36,11 @@ public class BaseClientObject {
         return response.getStatusLine().getStatusCode();
     }
 
-    public HttpUriRequest getRequest() {
-        return request;
-    }
-
     @SneakyThrows
-    public <T extends Object> T getSuccessResponseBody(Class<T> gClass, CloseableHttpResponse response) {
-        String responseCode = String.valueOf(getResponseCode(response));
+    public <T> T getResponseBody(Class<T> gClass, CloseableHttpResponse response) {
         String responseAsString = getEntity();
 
-        if (responseCode.startsWith("2")) return handler.getObject(responseAsString, gClass);
-        else throw new RuntimeException("Response code " + responseCode + " is not success");
+        return handler.getObject(responseAsString, gClass);
     }
 
     public HttpEntity getBadResponseBody(CloseableHttpResponse response) {
@@ -96,28 +90,28 @@ public class BaseClientObject {
     }
 
     @SneakyThrows
-    public CloseableHttpResponse get(String url, Map<String, String> headers){
+    public CloseableHttpResponse get(String url, Map<String, String> headers) {
         request = setRequest(url, GET, headers);
 
         return client.execute(request);
     }
 
     @SneakyThrows
-    public CloseableHttpResponse get(String url, Map<String, String> headers, HttpEntity entity){
+    public CloseableHttpResponse get(String url, Map<String, String> headers, HttpEntity entity) {
         request = setRequest(url, GET, headers, entity);
 
         return client.execute(request);
     }
 
     @SneakyThrows
-    public <T extends StringEntity> CloseableHttpResponse post(String url, Map<String, String> headers, T body){
+    public <T extends StringEntity> CloseableHttpResponse post(String url, Map<String, String> headers, T body) {
         request = setRequest(url, POST, headers, body);
 
         return client.execute(request);
     }
 
     @SneakyThrows
-    public <T> CloseableHttpResponse post(String url, Map<String, String> headers, T bodyClass){
+    public <T> CloseableHttpResponse post(String url, Map<String, String> headers, T bodyClass) {
         String json = handler.convertToJson(bodyClass);
         HttpEntity entity = new StringEntity(json);
 
