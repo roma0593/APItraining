@@ -96,45 +96,45 @@ public class UsersTest extends BaseTest {
         assertTrue(users.size() > 0, "Users are not retrieved");
     }
 
-    @Parameters({"age"})
+    @Parameters({"age", "olderParam"})
     @Test
-    public void getUsersOlderThan(int age){
+    public void getUsersOlderThan(int age, String olderParam){
         Map<String, String> nameValueMap = new HashMap<>();
-        nameValueMap.put("olderThan", String.valueOf(age));
+        nameValueMap.put(olderParam, String.valueOf(age));
 
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
 
         responseCode = usersClient.getStatusCodeOfResponse();
 
-        boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), "olderThan");
+        boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), olderParam);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(areUsersOlder, "Not all users are older than " + age);
     }
 
-    @Parameters({"age"})
+    @Parameters({"age", "youngerParam"})
     @Test
-    public void getUsersYoungerThan(int age){
+    public void getUsersYoungerThan(int age, String youngerParam){
         Map<String, String> nameValueMap = new HashMap<>();
-        nameValueMap.put("youngerThan", String.valueOf(age));
+        nameValueMap.put(youngerParam, String.valueOf(age));
 
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
 
         responseCode = usersClient.getStatusCodeOfResponse();
 
-        boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), "youngerThan");
+        boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), youngerParam);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(areUsersYounger, "Not all users are younger than " + age);
     }
 
-    @Parameters({"sex"})
+    @Parameters({"sex", "sexParam"})
     @Test
-    public void getUsersWithSex(String sex){
+    public void getUsersWithSex(String sex, String sexParam){
         Map<String, String> nameValueMap = new HashMap<>();
-        nameValueMap.put("sex", sex.toUpperCase());
+        nameValueMap.put(sexParam, sex.toUpperCase());
 
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);

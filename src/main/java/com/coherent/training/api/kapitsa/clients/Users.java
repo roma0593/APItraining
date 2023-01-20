@@ -1,12 +1,10 @@
 package com.coherent.training.api.kapitsa.clients;
 
+import com.coherent.training.api.kapitsa.util.plainobjects.Conditions;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import lombok.SneakyThrows;
-import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +15,8 @@ import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
 
 public class Users extends BaseClient{
     private static final String USERS_ENDPOINT = USERS.getEndpoint();
+    private static final String YOUNGER_THAN = Conditions.YOUNGER_THAN.getCondition();
+    private static final String OLDER_THAN = Conditions.OLDER_THAN.getCondition();
 
     public Users(CloseableHttpClient client) {
         super(client);
@@ -45,10 +45,8 @@ public class Users extends BaseClient{
     }
 
     public List<User> getAllUsersWithParam(Map<String, String> nameValueMap){
-        List<NameValuePair> nvp = getNvp(nameValueMap);
-
         try {
-            response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ), nvp);
+            response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ), nameValueMap);
 
             User[] userArray = baseClient.getResponseBody(User[].class, response);
             return Arrays.asList(userArray);
@@ -76,9 +74,9 @@ public class Users extends BaseClient{
         boolean areUsers = true;
 
         for (User user : userList){
-            if(condition.length > 0 && condition[0].equals("youngerThan")){
+            if(condition.length > 0 && condition[0].equals(YOUNGER_THAN)){
                 areUsers = user.getAge() < Integer.parseInt(value);
-            } else if (condition.length > 0 && condition[0].equals("olderThan")){
+            } else if (condition.length > 0 && condition[0].equals(OLDER_THAN)){
                 areUsers = user.getAge() > Integer.parseInt(value);
             } else {
                 areUsers = user.getSex().equalsIgnoreCase(value);
@@ -88,15 +86,5 @@ public class Users extends BaseClient{
         }
 
         return areUsers;
-    }
-
-    private List<NameValuePair> getNvp(Map<String, String> nameValueMap){
-        List<NameValuePair> nvp = new ArrayList<>();
-
-        for(String key : nameValueMap.keySet()){
-            nvp.add(new BasicNameValuePair(key, nameValueMap.get(key)));
-        }
-
-        return nvp;
     }
 }

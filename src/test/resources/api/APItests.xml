@@ -15,6 +15,9 @@
     <test name="Users API code">
         <parameter name="age" value="45"/>
         <parameter name="sex" value="male"/>
+        <parameter name="youngerParam" value="youngerThan"/>
+        <parameter name="olderParam" value="olderThan"/>
+        <parameter name="sexParam" value="sex"/>
         <classes>
             <class name="com.coherent.training.api.kapitsa.apitests.UsersTest"/>
         </classes>

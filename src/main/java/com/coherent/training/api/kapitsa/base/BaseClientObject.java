@@ -3,7 +3,6 @@ package com.coherent.training.api.kapitsa.base;
 import com.coherent.training.api.kapitsa.util.DataHandler;
 import lombok.SneakyThrows;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
@@ -11,7 +10,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
-import java.util.List;
 import java.util.Map;
 
 import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
@@ -73,12 +71,18 @@ public class BaseClientObject {
         return requestBuilder.build();
     }
 
-    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, NameValuePair[] nvp, HttpEntity... entity) {
+    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, Map<String, String> nvp, HttpEntity... entity) {
         requestBuilder = RequestBuilder.create(method)
-                .setUri(endpoint)
-                .addParameters(nvp);
+                .setUri(endpoint);
 
-        if (entity.length > 0) requestBuilder.setEntity(entity[0]);
+        for(String name : nvp.keySet()){
+            requestBuilder.addParameter(name, nvp.get(name));
+        }
+
+        if (entity.length > 0) {
+            requestBuilder.setEntity(entity[0]);
+        }
+
         setHeaders(headersMap);
 
         return requestBuilder.build();
@@ -91,8 +95,8 @@ public class BaseClientObject {
     }
 
     @SneakyThrows
-    public CloseableHttpResponse get(String url, Map<String, String> headers, List<NameValuePair> param) {
-        request = setRequestWithParams(url, GET, headers, param.toArray(NameValuePair[]::new));
+    public CloseableHttpResponse get(String url, Map<String, String> headers, Map<String, String> param) {
+        request = setRequestWithParams(url, GET, headers, param);
 
         return client.execute(request);
     }
