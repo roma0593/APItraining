@@ -11,6 +11,7 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import java.util.List;
 import java.util.Map;
 
 import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
@@ -72,12 +73,12 @@ public class BaseClientObject {
         return requestBuilder.build();
     }
 
-    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, HttpEntity entity, NameValuePair nvp) {
+    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, NameValuePair[] nvp, HttpEntity... entity) {
         requestBuilder = RequestBuilder.create(method)
                 .setUri(endpoint)
-                .addParameter(nvp)
-                .setEntity(entity);
+                .addParameters(nvp);
 
+        if (entity.length > 0) requestBuilder.setEntity(entity[0]);
         setHeaders(headersMap);
 
         return requestBuilder.build();
@@ -87,6 +88,13 @@ public class BaseClientObject {
         for (String key : headersMap.keySet()) {
             requestBuilder.setHeader(key, headersMap.get(key));
         }
+    }
+
+    @SneakyThrows
+    public CloseableHttpResponse get(String url, Map<String, String> headers, List<NameValuePair> param) {
+        request = setRequestWithParams(url, GET, headers, param.toArray(NameValuePair[]::new));
+
+        return client.execute(request);
     }
 
     @SneakyThrows
