@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLDER_THAN;
+import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static java.lang.Integer.parseInt;
 import static org.apache.http.HttpStatus.*;
 import static org.testng.Assert.*;
@@ -107,7 +109,7 @@ public class UsersTest extends BaseTest {
 
         responseCode = usersClient.getStatusCodeOfResponse();
 
-        boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), olderParam);
+        boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), OLDER_THAN);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(areUsersOlder, "Not all users are older than " + age);
@@ -124,7 +126,7 @@ public class UsersTest extends BaseTest {
 
         responseCode = usersClient.getStatusCodeOfResponse();
 
-        boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), youngerParam);
+        boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), YOUNGER_THAN);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(areUsersYounger, "Not all users are younger than " + age);

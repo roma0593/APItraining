@@ -10,13 +10,13 @@ import java.util.List;
 import java.util.Map;
 
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.USERS;
+import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLDER_THAN;
+import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
 
 public class Users extends BaseClient{
     private static final String USERS_ENDPOINT = USERS.getEndpoint();
-    private static final String YOUNGER_THAN = Conditions.YOUNGER_THAN.getCondition();
-    private static final String OLDER_THAN = Conditions.OLDER_THAN.getCondition();
 
     public Users(CloseableHttpClient client) {
         super(client);
@@ -70,7 +70,7 @@ public class Users extends BaseClient{
         return isAdded;
     }
 
-    public boolean areUsers(List<User> userList, String value, String... condition){
+    public boolean areUsers(List<User> userList, String value, Conditions... condition){
         boolean areUsers = true;
 
         for (User user : userList){
