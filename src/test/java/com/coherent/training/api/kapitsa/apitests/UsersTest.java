@@ -4,10 +4,15 @@ import com.coherent.training.api.kapitsa.clients.Users;
 import com.coherent.training.api.kapitsa.clients.ZipCode;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import com.coherent.training.api.kapitsa.utils.DataUtilization;
+import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLDER_THAN;
+import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static java.lang.Integer.parseInt;
 import static org.apache.http.HttpStatus.*;
 import static org.testng.Assert.*;
@@ -80,5 +85,67 @@ public class UsersTest extends BaseTest {
 
         assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
         assertFalse(isUserAdded, "User was added");
+    }
+
+    @Test
+    public void getAllUsers(){
+        usersClient = new Users(client);
+        List<User> users = usersClient.getAllUsers();
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
+        assertTrue(users.size() > 0, "Users are not retrieved");
+    }
+
+    @Parameters({"age", "olderParam"})
+    @Test
+    public void getUsersOlderThan(int age, String olderParam){
+        Map<String, String> nameValueMap = new HashMap<>();
+        nameValueMap.put(olderParam, String.valueOf(age));
+
+        usersClient = new Users(client);
+        List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), OLDER_THAN);
+
+        assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
+        assertTrue(areUsersOlder, "Not all users are older than " + age);
+    }
+
+    @Parameters({"age", "youngerParam"})
+    @Test
+    public void getUsersYoungerThan(int age, String youngerParam){
+        Map<String, String> nameValueMap = new HashMap<>();
+        nameValueMap.put(youngerParam, String.valueOf(age));
+
+        usersClient = new Users(client);
+        List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), YOUNGER_THAN);
+
+        assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
+        assertTrue(areUsersYounger, "Not all users are younger than " + age);
+    }
+
+    @Parameters({"sex", "sexParam"})
+    @Test
+    public void getUsersWithSex(String sex, String sexParam){
+        Map<String, String> nameValueMap = new HashMap<>();
+        nameValueMap.put(sexParam, sex.toUpperCase());
+
+        usersClient = new Users(client);
+        List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        boolean areUsersWithSex = usersClient.areUsers(users, sex);
+
+        assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
+        assertTrue(areUsersWithSex, "Not all users are " + sex);
     }
 }

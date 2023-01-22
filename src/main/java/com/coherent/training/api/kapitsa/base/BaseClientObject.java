@@ -3,7 +3,6 @@ package com.coherent.training.api.kapitsa.base;
 import com.coherent.training.api.kapitsa.util.DataHandler;
 import lombok.SneakyThrows;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
@@ -72,11 +71,17 @@ public class BaseClientObject {
         return requestBuilder.build();
     }
 
-    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, HttpEntity entity, NameValuePair nvp) {
+    private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, Map<String, String> nvp, HttpEntity... entity) {
         requestBuilder = RequestBuilder.create(method)
-                .setUri(endpoint)
-                .addParameter(nvp)
-                .setEntity(entity);
+                .setUri(endpoint);
+
+        for(String name : nvp.keySet()){
+            requestBuilder.addParameter(name, nvp.get(name));
+        }
+
+        if (entity.length > 0) {
+            requestBuilder.setEntity(entity[0]);
+        }
 
         setHeaders(headersMap);
 
@@ -87,6 +92,13 @@ public class BaseClientObject {
         for (String key : headersMap.keySet()) {
             requestBuilder.setHeader(key, headersMap.get(key));
         }
+    }
+
+    @SneakyThrows
+    public CloseableHttpResponse get(String url, Map<String, String> headers, Map<String, String> param) {
+        request = setRequestWithParams(url, GET, headers, param);
+
+        return client.execute(request);
     }
 
     @SneakyThrows
