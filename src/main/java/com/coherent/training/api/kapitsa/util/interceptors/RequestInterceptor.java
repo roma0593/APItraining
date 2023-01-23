@@ -17,7 +17,7 @@ public class RequestInterceptor implements HttpRequestInterceptor {
         HttpEntity entity = (request instanceof HttpEntityEnclosingRequest) ?
                 ((HttpEntityEnclosingRequest) request).getEntity() : null;
 
-        String stringEntity = (entity != null) ? EntityUtils.toString(entity, UTF_8) : "{}";
+        String stringEntity = (entity != null) ? EntityUtils.toString(entity, UTF_8) : "[]";
 
         logger.info("Request: {}", request.getRequestLine());
 

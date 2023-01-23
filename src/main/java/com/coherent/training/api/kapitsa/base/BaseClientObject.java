@@ -22,6 +22,8 @@ public class BaseClientObject {
     private RequestBuilder requestBuilder;
     private static final String POST = "POST";
     private static final String GET = "GET";
+    private static final String PUT = "PUT";
+    private static final String PATCH = "PATCH";
 
     public BaseClientObject(CloseableHttpClient client) {
         this.client = client;
@@ -75,7 +77,7 @@ public class BaseClientObject {
         requestBuilder = RequestBuilder.create(method)
                 .setUri(endpoint);
 
-        for(String name : nvp.keySet()){
+        for (String name : nvp.keySet()) {
             requestBuilder.addParameter(name, nvp.get(name));
         }
 
@@ -128,6 +130,26 @@ public class BaseClientObject {
         HttpEntity entity = new StringEntity(json);
 
         request = setRequest(url, POST, headers, entity);
+
+        return client.execute(request);
+    }
+
+    @SneakyThrows
+    public <T> CloseableHttpResponse put(String url, Map<String, String> headers, T bodyClass) {
+        String json = handler.convertToJson(bodyClass);
+        HttpEntity entity = new StringEntity(json);
+
+        request = setRequest(url, PUT, headers, entity);
+
+        return client.execute(request);
+    }
+
+    @SneakyThrows
+    public <T> CloseableHttpResponse patch(String url, Map<String, String> headers, T bodyClass) {
+        String json = handler.convertToJson(bodyClass);
+        HttpEntity entity = new StringEntity(json);
+
+        request = setRequest(url, PATCH, headers, entity);
 
         return client.execute(request);
     }

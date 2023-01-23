@@ -1,6 +1,7 @@
 package com.coherent.training.api.kapitsa.clients;
 
 import com.coherent.training.api.kapitsa.util.plainobjects.Conditions;
+import com.coherent.training.api.kapitsa.util.plainobjects.UpdateUser;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import lombok.SneakyThrows;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -15,7 +16,7 @@ import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOU
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
 
-public class Users extends BaseClient{
+public class Users extends BaseClient {
     private static final String USERS_ENDPOINT = USERS.getEndpoint();
 
     public Users(CloseableHttpClient client) {
@@ -23,7 +24,7 @@ public class Users extends BaseClient{
     }
 
     @SneakyThrows
-    public User addUser(User user){
+    public User addUser(User user) {
         try {
             response = baseClient.post(USERS_ENDPOINT, setHeadersMap(WRITE), user);
 
@@ -33,7 +34,7 @@ public class Users extends BaseClient{
         }
     }
 
-    public List<User> getAllUsers(){
+    public List<User> getAllUsers() {
         try {
             response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ));
 
@@ -44,7 +45,7 @@ public class Users extends BaseClient{
         }
     }
 
-    public List<User> getAllUsersWithParam(Map<String, String> nameValueMap){
+    public List<User> getAllUsersWithParam(Map<String, String> nameValueMap) {
         try {
             response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ), nameValueMap);
 
@@ -55,12 +56,24 @@ public class Users extends BaseClient{
         }
     }
 
-    public boolean isUserAdded(User userFromJson){
+    @SneakyThrows
+    public User updateUser(User userChanger, User userToChange) {
+        UpdateUser updateUser = new UpdateUser(userChanger, userToChange);
+
+        try {
+            response = baseClient.patch(USERS_ENDPOINT, setHeadersMap(WRITE), updateUser);
+            return baseClient.getRequestBody(UpdateUser.class).getUserNewValues();
+        } finally {
+            baseClient.closeResponse(response);
+        }
+    }
+
+    public boolean isUserAdded(User userFromJson) {
         List<User> userList = getAllUsers();
 
         boolean isAdded = false;
 
-        for (User user : userList){
+        for (User user : userList) {
             if (userFromJson.equals(user)) {
                 isAdded = true;
                 break;
@@ -70,13 +83,26 @@ public class Users extends BaseClient{
         return isAdded;
     }
 
-    public boolean areUsers(List<User> userList, String value, Conditions... condition){
+    public boolean isUserUpdated(User updatedUser) {
+        boolean isUserUpdated = false;
+
+        for (User user : getAllUsers()) {
+            if (user.equals(updatedUser)) {
+                isUserUpdated = true;
+                break;
+            }
+        }
+
+        return isUserUpdated;
+    }
+
+    public boolean areUsers(List<User> userList, String value, Conditions... condition) {
         boolean areUsers = true;
 
-        for (User user : userList){
-            if(condition.length > 0 && condition[0].equals(YOUNGER_THAN)){
+        for (User user : userList) {
+            if (condition.length > 0 && condition[0].equals(YOUNGER_THAN)) {
                 areUsers = user.getAge() < Integer.parseInt(value);
-            } else if (condition.length > 0 && condition[0].equals(OLDER_THAN)){
+            } else if (condition.length > 0 && condition[0].equals(OLDER_THAN)) {
                 areUsers = user.getAge() > Integer.parseInt(value);
             } else {
                 areUsers = user.getSex().equalsIgnoreCase(value);

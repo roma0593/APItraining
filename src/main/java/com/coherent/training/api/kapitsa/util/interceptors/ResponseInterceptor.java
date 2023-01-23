@@ -20,7 +20,7 @@ public class ResponseInterceptor implements HttpResponseInterceptor {
     @Override
     public void process(HttpResponse response, HttpContext context) throws IOException {
         HttpEntity entity = response.getEntity();
-        stringEntity = (entity != null) ? EntityUtils.toString(entity, UTF_8) : "{}";
+        stringEntity = (entity != null) ? EntityUtils.toString(entity, UTF_8) : "[]";
 
         logger.info("Response: {}", response.getStatusLine());
 
