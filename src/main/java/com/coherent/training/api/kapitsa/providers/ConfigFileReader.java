@@ -19,15 +19,17 @@ public class ConfigFileReader {
     private static final String PROFILE_PATH = "configs//profile.properties";
 
     @SneakyThrows
-    private ConfigFileReader() {setPropsCache();}
+    private ConfigFileReader() {
+        setPropsCache();
+    }
 
     @SneakyThrows
-    private void setPropsCache(){
+    private void setPropsCache() {
         List<String> propPathList = List.of(CONFIG_PATH, PROFILE_PATH);
         propsCache = new HashMap<>();
         BufferedReader reader;
 
-        for(String propPath : propPathList){
+        for (String propPath : propPathList) {
             reader = new BufferedReader(new FileReader(propPath));
             Properties property = new Properties();
             property.load(reader);
@@ -38,7 +40,7 @@ public class ConfigFileReader {
         }
     }
 
-    private static Properties getPropertyFromCache(String path){
+    private static Properties getPropertyFromCache(String path) {
         String propertyName = FilenameUtils.getName(path);
 
         return propsCache.get(propertyName);
@@ -70,7 +72,7 @@ public class ConfigFileReader {
         else throw new RuntimeException("Client secret is not specified");
     }
 
-    public String getHostUrl(){
+    public String getHostUrl() {
         properties = getPropertyFromCache(PROFILE_PATH);
 
         String profile = properties.getProperty(PROFILE.getPropertyKey());

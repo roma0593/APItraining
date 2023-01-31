@@ -27,14 +27,11 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         User receivedUser = usersClient.addUser(userToAdd);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserAdded = usersClient.isUserAdded(receivedUser);
 
         zipCodeClient = new ZipCode(client);
         List<String> availableZipCodes = zipCodeClient.getAllZipCodes();
-
         boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(availableZipCodes, receivedUser.getZipCode());
 
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
@@ -48,9 +45,7 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         User receivedUser = usersClient.addUser(userToAdd);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserAdded = usersClient.isUserAdded(receivedUser);
 
         assertEquals(responseCode, SC_BAD_REQUEST, "Expected and actual response code mismatch");
@@ -63,9 +58,7 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         User receivedUser = usersClient.addUser(userToAdd);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserAdded = usersClient.isUserAdded(receivedUser);
 
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
@@ -78,9 +71,7 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         User receivedUser = usersClient.addUser(userToAdd);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserAdded = usersClient.isUserAdded(receivedUser);
 
         assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
@@ -91,7 +82,6 @@ public class UsersTest extends BaseTest {
     public void getAllUsers() {
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsers();
-
         responseCode = usersClient.getStatusCodeOfResponse();
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
@@ -106,9 +96,7 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), OLDER_THAN);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
@@ -123,9 +111,7 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), YOUNGER_THAN);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
@@ -140,9 +126,7 @@ public class UsersTest extends BaseTest {
 
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean areUsersWithSex = usersClient.areUsers(users, sex);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
@@ -153,10 +137,9 @@ public class UsersTest extends BaseTest {
     public void updateUser(String newAge, String newName, String age, String name, String sex, String zipCode) {
         usersClient = new Users(client);
         User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newName, sex, zipCode), new User(parseInt(age), name, sex, zipCode));
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(isUserUpdated, "User is not updated");
     }
@@ -165,10 +148,9 @@ public class UsersTest extends BaseTest {
     public void updateUserWithInvalidZip(String newAge, String newName, String newSex, String newZipCode, String age, String name, String sex, String zipCode) {
         usersClient = new Users(client);
         User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newName, newSex, newZipCode), new User(parseInt(age), name, sex, zipCode));
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+
         assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
         assertFalse(isUserUpdated, "User is updated");
     }
@@ -177,11 +159,65 @@ public class UsersTest extends BaseTest {
     public void updateUserWithoutReqFields(String newAge, String newZipCode, String age, String name, String sex, String zipCode) {
         usersClient = new Users(client);
         User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newZipCode), new User(parseInt(age), name, sex, zipCode));
-
         responseCode = usersClient.getStatusCodeOfResponse();
-
         boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+
         assertEquals(responseCode, SC_CONFLICT, "Expected and actual response code mismatch");
         assertFalse(isUserUpdated, "User is updated");
+    }
+
+    @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
+    public void deleteUserWithAllFields(String age, String name, String sex, String zipCode) {
+        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToDelete = new User(name, sex);
+
+        usersClient = new Users(client);
+        usersClient.addUser(userToAdd);
+        usersClient.deleteUser(userToDelete);
+        responseCode = usersClient.getStatusCodeOfResponse();
+        boolean isUserExisted = usersClient.isUserAdded(userToDelete);
+
+        zipCodeClient = new ZipCode(client);
+        List<String> listOfZipCodes = zipCodeClient.getAllZipCodes();
+        boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(listOfZipCodes, zipCode);
+
+        assertEquals(responseCode, SC_NO_CONTENT, "Expected and actual response code mismatch");
+        assertFalse(isUserExisted, "User is not removed");
+        assertTrue(isZipCodeAvailable, "Zip code is not available");
+    }
+
+    @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
+    public void deleteUserWithRequiredFields(String age, String name, String sex, String zipCode) {
+        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToDelete = new User(name, sex);
+
+        usersClient = new Users(client);
+        usersClient.addUser(userToAdd);
+        usersClient.deleteUser(userToDelete);
+        responseCode = usersClient.getStatusCodeOfResponse();
+        boolean isUserExisted = usersClient.isUserAdded(userToDelete);
+
+        zipCodeClient = new ZipCode(client);
+        List<String> listOfZipCodes = zipCodeClient.getAllZipCodes();
+        boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(listOfZipCodes, zipCode);
+
+        assertEquals(responseCode, SC_NO_CONTENT, "Expected and actual response code mismatch");
+        assertFalse(isUserExisted, "User is not removed");
+        assertTrue(isZipCodeAvailable, "Zip code is not available");
+    }
+
+    @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
+    public void deleteUserWithMissedRequiredFields(String age, String name, String sex, String zipCode) {
+        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToDelete = new User(name, zipCode);
+
+        usersClient = new Users(client);
+        usersClient.addUser(userToAdd);
+        usersClient.deleteUser(userToDelete);
+        responseCode = usersClient.getStatusCodeOfResponse();
+        boolean isUserExisted = usersClient.isUserAdded(userToDelete);
+
+        assertEquals(responseCode, SC_CONFLICT, "Expected and actual response code mismatch");
+        assertTrue(isUserExisted, "User is removed");
     }
 }

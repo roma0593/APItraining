@@ -24,6 +24,7 @@ public class BaseClientObject {
     private static final String GET = "GET";
     private static final String PUT = "PUT";
     private static final String PATCH = "PATCH";
+    private static final String DELETE = "DELETE";
 
     public BaseClientObject(CloseableHttpClient client) {
         this.client = client;
@@ -126,31 +127,34 @@ public class BaseClientObject {
 
     @SneakyThrows
     public <T> CloseableHttpResponse post(String url, Map<String, String> headers, T bodyClass) {
-        String json = handler.convertToJson(bodyClass);
-        HttpEntity entity = new StringEntity(json);
-
-        request = setRequest(url, POST, headers, entity);
+        request = setRequest(url, POST, headers, toHttpEntity(bodyClass));
 
         return client.execute(request);
     }
 
     @SneakyThrows
     public <T> CloseableHttpResponse put(String url, Map<String, String> headers, T bodyClass) {
-        String json = handler.convertToJson(bodyClass);
-        HttpEntity entity = new StringEntity(json);
-
-        request = setRequest(url, PUT, headers, entity);
+        request = setRequest(url, PUT, headers, toHttpEntity(bodyClass));
 
         return client.execute(request);
     }
 
     @SneakyThrows
     public <T> CloseableHttpResponse patch(String url, Map<String, String> headers, T bodyClass) {
-        String json = handler.convertToJson(bodyClass);
-        HttpEntity entity = new StringEntity(json);
-
-        request = setRequest(url, PATCH, headers, entity);
+        request = setRequest(url, PATCH, headers, toHttpEntity(bodyClass));
 
         return client.execute(request);
+    }
+
+    @SneakyThrows
+    public <T> CloseableHttpResponse delete(String url, Map<String, String> headers, T bodyClass) {
+        request = setRequest(url, DELETE, headers, toHttpEntity(bodyClass));
+
+        return client.execute(request);
+    }
+
+    @SneakyThrows
+    private <T> HttpEntity toHttpEntity(T bodyClass) {
+        return new StringEntity(handler.convertToJson(bodyClass));
     }
 }
