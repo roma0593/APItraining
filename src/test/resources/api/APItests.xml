@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd">
 <suite name="All APIs suite">
-<!--    <test name="Zip code API tests">-->
-<!--        <parameter name="zipCode1" value="123456"/>-->
-<!--        <parameter name="zipCode2" value="685856"/>-->
-<!--        <parameter name="zipCode3" value="6865986"/>-->
-<!--        <parameter name="zipCode4" value="6865911"/>-->
-<!--        <parameter name="zipCode5" value="5225486"/>-->
-<!--        <classes>-->
-<!--            <class name="com.coherent.training.api.kapitsa.apitests.ZipCodeTest"/>-->
-<!--        </classes>-->
-<!--    </test>-->
+    <test name="Zip code API tests">
+        <parameter name="zipCode1" value="123456"/>
+        <parameter name="zipCode2" value="685856"/>
+        <parameter name="zipCode3" value="6865986"/>
+        <parameter name="zipCode4" value="6865911"/>
+        <parameter name="zipCode5" value="5225486"/>
+        <classes>
+            <class name="com.coherent.training.api.kapitsa.apitests.ZipCodeTest"/>
+        </classes>
+    </test>
 
     <test name="Users API code">
         <parameter name="age" value="45"/>

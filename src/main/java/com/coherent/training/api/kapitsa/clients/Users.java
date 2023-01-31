@@ -68,6 +68,14 @@ public class Users extends BaseClient {
         }
     }
 
+    public void deleteUser(User userToDelete) {
+        try {
+            response = baseClient.delete(USERS_ENDPOINT, setHeadersMap(WRITE), userToDelete);
+        } finally {
+            baseClient.closeResponse(response);
+        }
+    }
+
     public boolean isUserAdded(User userFromJson) {
         List<User> userList = getAllUsers();
 

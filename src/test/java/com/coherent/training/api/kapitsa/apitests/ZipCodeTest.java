@@ -15,27 +15,21 @@ public class ZipCodeTest extends BaseTest {
     private ZipCode zipCodeClient;
 
     @Test
-    public void getAllZipCodesTest(){
+    public void getAllZipCodesTest() {
         zipCodeClient = new ZipCode(client);
-
         List<String> zipCodes = zipCodeClient.getAllZipCodes();
-
         responseCode = zipCodeClient.getStatusCodeOfResponse();
 
         assertTrue(zipCodes.size() > 0, "There are no saved zip codes");
-
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
     }
 
     @Parameters({"zipCode1", "zipCode2", "zipCode3"})
     @Test
-    public void addZipCodesTest(String zipCode1, String zipCode2, String zipCode3){
+    public void addZipCodesTest(String zipCode1, String zipCode2, String zipCode3) {
         zipCodeClient = new ZipCode(client);
-
         List<String> returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode2, zipCode3);
-
         responseCode = zipCodeClient.getStatusCodeOfResponse();
-
         boolean areSaved = zipCodeClient.zipCodesAreSaved(returnedZipCodes, zipCode1, zipCode2, zipCode3);
 
         assertTrue(areSaved, "Not all zip codes are saved");
@@ -44,13 +38,10 @@ public class ZipCodeTest extends BaseTest {
 
     @Parameters({"zipCode2", "zipCode4"})
     @Test
-    public void addDuplicatedZipCodesTest(String zipCode2, String zipCode4){
+    public void addDuplicatedZipCodesTest(String zipCode2, String zipCode4) {
         zipCodeClient = new ZipCode(client);
-
         List<String> zipCodesList = zipCodeClient.addNewZipCodes(zipCode4, zipCode2, zipCode2);
-
         responseCode = zipCodeClient.getStatusCodeOfResponse();
-
         boolean areSaved = zipCodeClient.zipCodesAreSaved(zipCodesList, zipCode4, zipCode2, zipCode2);
         boolean areUnique = zipCodeClient.isZipCodesUnique(zipCodesList, zipCode4, zipCode2, zipCode2);
 
@@ -61,13 +52,10 @@ public class ZipCodeTest extends BaseTest {
 
     @Parameters({"zipCode1", "zipCode2"})
     @Test
-    public void addZipCodesAsAlreadySaved(String zipCode1, String zipCode5){
+    public void addZipCodesAsAlreadySaved(String zipCode1, String zipCode5) {
         zipCodeClient = new ZipCode(client);
-
         List<String> returnedZipCodes = zipCodeClient.addNewZipCodes(zipCode1, zipCode5);
-
         responseCode = zipCodeClient.getStatusCodeOfResponse();
-
         boolean areSaved = zipCodeClient.zipCodesAreSaved(returnedZipCodes, zipCode1, zipCode5);
         boolean areUnique = zipCodeClient.isZipCodesUnique(returnedZipCodes, zipCode1, zipCode5);
 
