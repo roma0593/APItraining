@@ -26,6 +26,11 @@ public class User {
         this.sex = sex;
     }
 
+    public User(int age, String zipCode) {
+        this.age = age;
+        this.zipCode = zipCode;
+    }
+
     public int getAge() {
         return age;
     }

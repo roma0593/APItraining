@@ -88,7 +88,7 @@ public class UsersTest extends BaseTest {
     }
 
     @Test
-    public void getAllUsers(){
+    public void getAllUsers() {
         usersClient = new Users(client);
         List<User> users = usersClient.getAllUsers();
 
@@ -100,7 +100,7 @@ public class UsersTest extends BaseTest {
 
     @Parameters({"age", "olderParam"})
     @Test
-    public void getUsersOlderThan(int age, String olderParam){
+    public void getUsersOlderThan(int age, String olderParam) {
         Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put(olderParam, String.valueOf(age));
 
@@ -117,7 +117,7 @@ public class UsersTest extends BaseTest {
 
     @Parameters({"age", "youngerParam"})
     @Test
-    public void getUsersYoungerThan(int age, String youngerParam){
+    public void getUsersYoungerThan(int age, String youngerParam) {
         Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put(youngerParam, String.valueOf(age));
 
@@ -134,7 +134,7 @@ public class UsersTest extends BaseTest {
 
     @Parameters({"sex", "sexParam"})
     @Test
-    public void getUsersWithSex(String sex, String sexParam){
+    public void getUsersWithSex(String sex, String sexParam) {
         Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put(sexParam, sex.toUpperCase());
 
@@ -147,5 +147,41 @@ public class UsersTest extends BaseTest {
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(areUsersWithSex, "Not all users are " + sex);
+    }
+
+    @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUserReqFieldsProvider")
+    public void updateUser(String newAge, String newName, String age, String name, String sex, String zipCode) {
+        usersClient = new Users(client);
+        User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newName, sex, zipCode), new User(parseInt(age), name, sex, zipCode));
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+        assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
+        assertTrue(isUserUpdated, "User is not updated");
+    }
+
+    @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUserWithInvZipProvider")
+    public void updateUserWithInvalidZip(String newAge, String newName, String newSex, String newZipCode, String age, String name, String sex, String zipCode) {
+        usersClient = new Users(client);
+        User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newName, newSex, newZipCode), new User(parseInt(age), name, sex, zipCode));
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+        assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
+        assertFalse(isUserUpdated, "User is updated");
+    }
+
+    @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUseOptFieldsProvider")
+    public void updateUserWithoutReqFields(String newAge, String newZipCode, String age, String name, String sex, String zipCode) {
+        usersClient = new Users(client);
+        User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newZipCode), new User(parseInt(age), name, sex, zipCode));
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+
+        boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+        assertEquals(responseCode, SC_CONFLICT, "Expected and actual response code mismatch");
+        assertFalse(isUserUpdated, "User is updated");
     }
 }
