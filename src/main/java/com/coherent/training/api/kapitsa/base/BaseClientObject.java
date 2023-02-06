@@ -6,10 +6,13 @@ import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import java.io.File;
 import java.util.Map;
 
 import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
@@ -74,6 +77,7 @@ public class BaseClientObject {
         return requestBuilder.build();
     }
 
+
     private HttpUriRequest setRequestWithParams(String endpoint, String method, Map<String, String> headersMap, Map<String, String> nvp, HttpEntity... entity) {
         requestBuilder = RequestBuilder.create(method)
                 .setUri(endpoint);
@@ -133,6 +137,13 @@ public class BaseClientObject {
     }
 
     @SneakyThrows
+    public CloseableHttpResponse post(String url, Map<String, String> headers, File file) {
+        request = setRequest(url, POST, headers, getMultipartEntity(file));
+
+        return client.execute(request);
+    }
+
+    @SneakyThrows
     public <T> CloseableHttpResponse put(String url, Map<String, String> headers, T bodyClass) {
         request = setRequest(url, PUT, headers, toHttpEntity(bodyClass));
 
@@ -156,5 +167,11 @@ public class BaseClientObject {
     @SneakyThrows
     private <T> HttpEntity toHttpEntity(T bodyClass) {
         return new StringEntity(handler.convertToJson(bodyClass));
+    }
+
+    private HttpEntity getMultipartEntity(File file) {
+        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+        return builder.addBinaryBody("file", file, ContentType.DEFAULT_BINARY, file.getName())
+                .build();
     }
 }

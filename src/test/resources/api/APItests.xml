@@ -20,6 +20,9 @@
         <parameter name="sexParam" value="sex"/>
         <parameter name="newAge" value="68"/>
         <parameter name="newName" value="Eric"/>
+        <parameter name="allFieldsPath" value="src/test/resources/test_data/users/upload_user_all_fields.json"/>
+        <parameter name="invZipcodePath" value="src/test/resources/test_data/users/upload_invalid_zipcode.json"/>
+        <parameter name="missedFieldsPath" value="src/test/resources/test_data/users/upload_missed_fields.json"/>
 
         <classes>
             <class name="com.coherent.training.api.kapitsa.apitests.UsersTest"/>

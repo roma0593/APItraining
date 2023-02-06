@@ -4,20 +4,26 @@ import com.coherent.training.api.kapitsa.util.plainobjects.Conditions;
 import com.coherent.training.api.kapitsa.util.plainobjects.UpdateUser;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import lombok.SneakyThrows;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import static com.coherent.training.api.kapitsa.providers.UrlProvider.UPLOAD_USERS;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.USERS;
+import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLDER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
+import static org.apache.http.HttpStatus.SC_CREATED;
 
 public class Users extends BaseClient {
     private static final String USERS_ENDPOINT = USERS.getEndpoint();
+    private static final String UPLOAD_ENDPOINT = UPLOAD_USERS.getEndpoint();
 
     public Users(CloseableHttpClient client) {
         super(client);
@@ -68,12 +74,39 @@ public class Users extends BaseClient {
         }
     }
 
+    public int uploadUsers(File file) {
+        try {
+            response = baseClient.post(UPLOAD_ENDPOINT, setHeadersMap(WRITE), file);
+
+            int responseCode = getStatusCodeOfResponse();
+
+            if (responseCode == SC_CREATED) {
+                return getNumberOfUploadedUsers(getEntity());
+            } else {
+                return 0;
+            }
+
+        } finally {
+            baseClient.closeResponse(response);
+        }
+    }
+
     public void deleteUser(User userToDelete) {
         try {
             response = baseClient.delete(USERS_ENDPOINT, setHeadersMap(WRITE), userToDelete);
         } finally {
             baseClient.closeResponse(response);
         }
+    }
+
+    private int getNumberOfUploadedUsers(String uploadResponse) {
+        return Integer.parseInt(uploadResponse.substring(18));
+    }
+
+    public boolean areUsersUploaded(List<User> uploadedUsers) {
+        List<User> savedUsers = getAllUsers();
+
+        return CollectionUtils.isEqualCollection(uploadedUsers, savedUsers);
     }
 
     public boolean isUserAdded(User userFromJson) {
