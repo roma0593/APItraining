@@ -4,7 +4,8 @@ public enum UrlProvider {
     OAUTH_URL("/oauth/token"),
     GET_ZIP_CODES("/zip-codes"),
     EXPAND_ZIP_CODES("/zip-codes/expand"),
-    USERS("/users");
+    USERS("/users"),
+    UPLOAD_USERS("/users/upload");
 
     private static final String HOST_URL = ConfigFileReader.getInstance().getHostUrl();
 

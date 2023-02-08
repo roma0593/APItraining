@@ -2,11 +2,13 @@ package com.coherent.training.api.kapitsa.apitests;
 
 import com.coherent.training.api.kapitsa.clients.Users;
 import com.coherent.training.api.kapitsa.clients.ZipCode;
+import com.coherent.training.api.kapitsa.util.DataHandler;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import com.coherent.training.api.kapitsa.utils.DataUtilization;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import static org.testng.Assert.*;
 public class UsersTest extends BaseTest {
     private Users usersClient;
     private ZipCode zipCodeClient;
+    private final DataHandler dataHandler = new DataHandler();
 
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void addUserWithAllFields(String age, String name, String sex, String zipCode) {
@@ -219,5 +222,53 @@ public class UsersTest extends BaseTest {
 
         assertEquals(responseCode, SC_CONFLICT, "Expected and actual response code mismatch");
         assertTrue(isUserExisted, "User is removed");
+    }
+
+    @Parameters({"allFieldsPath"})
+    @Test
+    public void uploadUsersWithAllFields(String allFieldsPath) {
+        File file = new File(allFieldsPath);
+        List<User> listOfUploadedUsers = dataHandler.getObjectFromFile(file, List.class);
+        usersClient = new Users(client);
+
+        int numberOfUploadedUserResp = usersClient.uploadUsers(file);
+        responseCode = usersClient.getStatusCodeOfResponse();
+        boolean areUsersUploaded = usersClient.areUsersUploaded(listOfUploadedUsers);
+
+        assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
+        assertTrue(areUsersUploaded, "Users are not uploaded");
+        assertEquals(numberOfUploadedUserResp, listOfUploadedUsers.size(), "Expected and actual number of uploaded users mismatch");
+    }
+
+    @Parameters({"invZipcodePath"})
+    @Test
+    public void uploadUsersWithInvalidZipCode(String invZipcodePath) {
+        File file = new File(invZipcodePath);
+        List<User> listOfUploadedUsers = dataHandler.getObjectFromFile(file, List.class);
+
+        usersClient = new Users(client);
+        usersClient.uploadUsers(file);
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+        boolean areUsersUploaded = usersClient.areUsersUploaded(listOfUploadedUsers);
+
+        assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
+        assertFalse(areUsersUploaded, "Users are uploaded");
+    }
+
+    @Parameters({"missedFieldsPath"})
+    @Test
+    public void uploadUsersWithMissedReqField(String missedFieldsPath) {
+        File file = new File(missedFieldsPath);
+        List<User> listOfUploadedUsers = dataHandler.getObjectFromFile(file, List.class);
+
+        usersClient = new Users(client);
+        usersClient.uploadUsers(file);
+
+        responseCode = usersClient.getStatusCodeOfResponse();
+        boolean areUsersUploaded = usersClient.areUsersUploaded(listOfUploadedUsers);
+
+        assertEquals(responseCode, SC_CONFLICT, "Expected and actual response code mismatch");
+        assertFalse(areUsersUploaded, "Users are uploaded");
     }
 }

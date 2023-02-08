@@ -48,14 +48,6 @@ public class User {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return age == user.age && Objects.equals(name, user.name) && Objects.equals(sex, user.sex) && Objects.equals(zipCode, user.zipCode);
-    }
-
-    @Override
     public String toString() {
         return "User{" +
                 "age=" + age +
@@ -63,5 +55,18 @@ public class User {
                 ", sex='" + sex + '\'' +
                 ", zipCode='" + zipCode + '\'' +
                 '}';
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(age, name, sex, zipCode);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+        User user = (User) o;
+        return getAge() == user.getAge() && Objects.equals(getName(), user.getName()) && Objects.equals(getSex(), user.getSex()) && Objects.equals(getZipCode(), user.getZipCode());
     }
 }
