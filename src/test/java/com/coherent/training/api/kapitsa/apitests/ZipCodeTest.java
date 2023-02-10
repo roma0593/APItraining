@@ -1,6 +1,7 @@
 package com.coherent.training.api.kapitsa.apitests;
 
 import com.coherent.training.api.kapitsa.clients.ZipCode;
+import io.qameta.allure.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -14,6 +15,10 @@ import static org.testng.Assert.assertTrue;
 public class ZipCodeTest extends BaseTest {
     private ZipCode zipCodeClient;
 
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Getting all zipcodes")
+    @Step("Make GET request to /zip-codes API")
+    @Link(name = "ZCS-1")
     @Test
     public void getAllZipCodesTest() {
         zipCodeClient = new ZipCode(client);
@@ -24,6 +29,9 @@ public class ZipCodeTest extends BaseTest {
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding zipcodes")
+    @Step("Make POST request to /zip-codes/expand with body containing list of zipcodes")
     @Parameters({"zipCode1", "zipCode2", "zipCode3"})
     @Test
     public void addZipCodesTest(String zipCode1, String zipCode2, String zipCode3) {
@@ -36,7 +44,11 @@ public class ZipCodeTest extends BaseTest {
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding duplicated zipcodes")
+    @Step("Make POST request to /zip-codes/expand with body containing duplicated zipcodes")
     @Parameters({"zipCode2", "zipCode4"})
+    @Link(name = "ZCS-2")
     @Test
     public void addDuplicatedZipCodesTest(String zipCode2, String zipCode4) {
         zipCodeClient = new ZipCode(client);
@@ -50,7 +62,11 @@ public class ZipCodeTest extends BaseTest {
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding zipcodes with already existing codes")
+    @Step("Make POST request to /zip-codes/expand with body containing list of already existing zipcodes")
     @Parameters({"zipCode1", "zipCode2"})
+    @Link(name = "ZCS-3")
     @Test
     public void addZipCodesAsAlreadySaved(String zipCode1, String zipCode5) {
         zipCodeClient = new ZipCode(client);

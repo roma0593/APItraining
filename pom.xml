@@ -11,7 +11,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <aspectj.version>1.9.6</aspectj.version>
-        <allure.version>2.20.0</allure.version>
+        <allure.version>2.21.0</allure.version>
     </properties>
 
     <dependencies>
@@ -125,7 +125,7 @@
                 <configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>
-                            src\test\resources\browserTests\login.xml
+                            src\test\resources\api\APItests.xml
                         </suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>

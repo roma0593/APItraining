@@ -1,5 +1,6 @@
 package com.coherent.training.api.kapitsa.util.interceptors;
 
+import io.qameta.allure.Attachment;
 import org.apache.http.*;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
@@ -12,19 +13,43 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 public class ResponseInterceptor implements HttpResponseInterceptor {
     private static final org.slf4j.Logger logger = LoggerFactory.getLogger(ResponseInterceptor.class.getSimpleName());
     private static String stringEntity;
+    private StatusLine responseLine;
+    private Header[] headers;
 
     public static String getEntity() {
         return stringEntity;
     }
 
+
     @Override
     public void process(HttpResponse response, HttpContext context) throws IOException {
+        responseLine = response.getStatusLine();
+        headers = response.getAllHeaders();
+
         HttpEntity entity = response.getEntity();
         stringEntity = (entity != null) ? EntityUtils.toString(entity, UTF_8) : "[]";
 
-        logger.info("Response: {}", response.getStatusLine());
+        writeResponseToReport();
+        logResponse();
+    }
 
-        for(Header header : response.getAllHeaders()){
+    @Attachment(value = "Response")
+    private String writeResponseToReport() {
+        StringBuilder requestHeaders = new StringBuilder();
+
+        for (Header header : headers) {
+            requestHeaders.append(header.getName() + ": " + header.getValue() + "\n");
+        }
+
+        return responseLine + "\n"
+                + requestHeaders + "\n"
+                + stringEntity;
+    }
+
+    private void logResponse() {
+        logger.info("Response: {}", responseLine);
+
+        for (Header header : headers) {
             logger.info("{}: {}", header.getName(), header.getValue());
         }
 
