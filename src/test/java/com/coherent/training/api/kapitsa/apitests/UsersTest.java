@@ -5,6 +5,7 @@ import com.coherent.training.api.kapitsa.clients.ZipCode;
 import com.coherent.training.api.kapitsa.util.DataHandler;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import com.coherent.training.api.kapitsa.utils.DataUtilization;
+import io.qameta.allure.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -24,6 +25,9 @@ public class UsersTest extends BaseTest {
     private ZipCode zipCodeClient;
     private final DataHandler dataHandler = new DataHandler();
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding user with all fields")
+    @Step("Make POST request to /users API with body containing all user's fields")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void addUserWithAllFields(String age, String name, String sex, String zipCode) {
         User userToAdd = new User(parseInt(age), name, sex, zipCode);
@@ -42,6 +46,10 @@ public class UsersTest extends BaseTest {
         assertFalse(isZipCodeAvailable, "Zip code is available");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding user with invalid name/sex pair fields")
+    @Step("Make POST request to /users API with body containing invalid name/sex pair")
+    @Link(name = "US-1")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "invalidNameSexUserProvider")
     public void addUserWithExistingNameSexPair(String age, String name, String sex, String zipCode) {
         User userToAdd = new User(parseInt(age), name, sex, zipCode);
@@ -55,6 +63,9 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserAdded, "User was added");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding user with required fields")
+    @Step("Make POST request to /users API with body containing required user's fields")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "requiredFieldsUserProvider")
     public void addUserWithRequiredFields(String name, String sex) {
         User userToAdd = new User(name, sex);
@@ -68,6 +79,9 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserAdded, "User was not added");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Adding user with unavailable zipcodes")
+    @Step("Make POST request to /users API with body containing user with unavailable zipcodes")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "invalidZipcodeUserProvider")
     public void addUserWithUnavailableZipCode(String age, String name, String sex, String zipCode) {
         User userToAdd = new User(parseInt(age), name, sex, zipCode);
@@ -81,6 +95,9 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserAdded, "User was added");
     }
 
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Getting all users")
+    @Step("Make GET request to /users API")
     @Test
     public void getAllUsers() {
         usersClient = new Users(client);
@@ -91,6 +108,9 @@ public class UsersTest extends BaseTest {
         assertTrue(users.size() > 0, "Users are not retrieved");
     }
 
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Getting users by olderThan parameter")
+    @Step("Make GET request to /users API with olderThan parameter")
     @Parameters({"age", "olderParam"})
     @Test
     public void getUsersOlderThan(int age, String olderParam) {
@@ -106,6 +126,9 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersOlder, "Not all users are older than " + age);
     }
 
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Getting users by youngerThan parameter")
+    @Step("Make GET request to /users API with youngerThan parameter")
     @Parameters({"age", "youngerParam"})
     @Test
     public void getUsersYoungerThan(int age, String youngerParam) {
@@ -121,6 +144,9 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersYounger, "Not all users are younger than " + age);
     }
 
+    @Severity(SeverityLevel.NORMAL)
+    @Description("Getting users by sex parameter")
+    @Step("Make GET request to /users API with sex parameter")
     @Parameters({"sex", "sexParam"})
     @Test
     public void getUsersWithSex(String sex, String sexParam) {
@@ -136,6 +162,10 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersWithSex, "Not all users are " + sex);
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Update users with all valid fields")
+    @Step("Make PUT/PATCH request to /users API with existing user and user to update in the body")
+    @Link(name = "US-2")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUserReqFieldsProvider")
     public void updateUser(String newAge, String newName, String age, String name, String sex, String zipCode) {
         usersClient = new Users(client);
@@ -147,6 +177,10 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserUpdated, "User is not updated");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Update users with invalid zipcode field")
+    @Step("Make PUT/PATCH request to /users API with existing user and user to update with invalid zipcode in body")
+    @Link(name = "US-2")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUserWithInvZipProvider")
     public void updateUserWithInvalidZip(String newAge, String newName, String newSex, String newZipCode, String age, String name, String sex, String zipCode) {
         usersClient = new Users(client);
@@ -158,6 +192,10 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserUpdated, "User is updated");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Update users without required fields")
+    @Step("Make PUT/PATCH request to /users API with existing user and user to update without required fields in the body")
+    @Link(name = "US-3")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUseOptFieldsProvider")
     public void updateUserWithoutReqFields(String newAge, String newZipCode, String age, String name, String sex, String zipCode) {
         usersClient = new Users(client);
@@ -169,6 +207,10 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserUpdated, "User is updated");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Delete user with all fields")
+    @Step("Make DELETE request to /users API with body containing user with all fields")
+    @Link(name = "US-4")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void deleteUserWithAllFields(String age, String name, String sex, String zipCode) {
         User userToAdd = new User(parseInt(age), name, sex, zipCode);
@@ -189,6 +231,10 @@ public class UsersTest extends BaseTest {
         assertTrue(isZipCodeAvailable, "Zip code is not available");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Delete user with required fields")
+    @Step("Make DELETE request to /users API with body containing user with required fields")
+    @Link(name = "US-5")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void deleteUserWithRequiredFields(String age, String name, String sex, String zipCode) {
         User userToAdd = new User(parseInt(age), name, sex, zipCode);
@@ -209,6 +255,10 @@ public class UsersTest extends BaseTest {
         assertTrue(isZipCodeAvailable, "Zip code is not available");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Delete user with missed required fields")
+    @Step("Make DELETE request to /users API with body containing user with missed required fields")
+    @Link(name = "US-6")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void deleteUserWithMissedRequiredFields(String age, String name, String sex, String zipCode) {
         User userToAdd = new User(parseInt(age), name, sex, zipCode);
@@ -224,7 +274,11 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserExisted, "User is removed");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Upload users from the file")
+    @Step("Make POST request to /users/upload API with multiform body from json file")
     @Parameters({"allFieldsPath"})
+    @Link(name = "US-7")
     @Test
     public void uploadUsersWithAllFields(String allFieldsPath) {
         File file = new File(allFieldsPath);
@@ -240,7 +294,11 @@ public class UsersTest extends BaseTest {
         assertEquals(numberOfUploadedUserResp, listOfUploadedUsers.size(), "Expected and actual number of uploaded users mismatch");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Upload users from the file with invalid zipcodes")
+    @Step("Make POST request to /users/upload API with multiform body from json file containing users with invalid zipcodes")
     @Parameters({"invZipcodePath"})
+    @Link(name = "US-8")
     @Test
     public void uploadUsersWithInvalidZipCode(String invZipcodePath) {
         File file = new File(invZipcodePath);
@@ -256,7 +314,11 @@ public class UsersTest extends BaseTest {
         assertFalse(areUsersUploaded, "Users are uploaded");
     }
 
+    @Severity(SeverityLevel.CRITICAL)
+    @Description("Upload users from the file with missed required fields")
+    @Step("Make POST request to /users/upload API with multiform body from json file containing users with missed required fields")
     @Parameters({"missedFieldsPath"})
+    @Link(name = "US-9")
     @Test
     public void uploadUsersWithMissedReqField(String missedFieldsPath) {
         File file = new File(missedFieldsPath);

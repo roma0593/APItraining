@@ -19,11 +19,13 @@ import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLD
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.apache.http.HttpStatus.SC_CREATED;
 
 public class Users extends BaseClient {
     private static final String USERS_ENDPOINT = USERS.getEndpoint();
     private static final String UPLOAD_ENDPOINT = UPLOAD_USERS.getEndpoint();
+    private static final int POSITION_TO_CUT = 18;
 
     public Users(CloseableHttpClient client) {
         super(client);
@@ -76,7 +78,10 @@ public class Users extends BaseClient {
 
     public int uploadUsers(File file) {
         try {
-            response = baseClient.post(UPLOAD_ENDPOINT, setHeadersMap(WRITE), file);
+            Map<String, String> headersMap = setHeadersMap(WRITE);
+            headersMap.remove(CONTENT_TYPE);
+
+            response = baseClient.post(UPLOAD_ENDPOINT, headersMap, file);
 
             int responseCode = getStatusCodeOfResponse();
 
@@ -100,7 +105,7 @@ public class Users extends BaseClient {
     }
 
     private int getNumberOfUploadedUsers(String uploadResponse) {
-        return Integer.parseInt(uploadResponse.substring(18));
+        return Integer.parseInt(uploadResponse.substring(POSITION_TO_CUT));
     }
 
     public boolean areUsersUploaded(List<User> uploadedUsers) {
