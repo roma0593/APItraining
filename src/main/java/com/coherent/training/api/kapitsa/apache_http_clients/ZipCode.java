@@ -1,4 +1,4 @@
-package com.coherent.training.api.kapitsa.clients;
+package com.coherent.training.api.kapitsa.apache_http_clients;
 
 import lombok.SneakyThrows;
 import org.apache.http.impl.client.CloseableHttpClient;

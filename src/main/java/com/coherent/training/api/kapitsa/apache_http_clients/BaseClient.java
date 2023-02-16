@@ -1,6 +1,6 @@
-package com.coherent.training.api.kapitsa.clients;
+package com.coherent.training.api.kapitsa.apache_http_clients;
 
-import com.coherent.training.api.kapitsa.base.BaseClientObject;
+import com.coherent.training.api.kapitsa.base.ApacheHttpClientObject;
 import com.coherent.training.api.kapitsa.util.plainobjects.Scope;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -8,18 +8,18 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.coherent.training.api.kapitsa.clients.Authenticator.getInstance;
+import static com.coherent.training.api.kapitsa.apache_http_clients.Authenticator.getInstance;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
 public class BaseClient {
     protected static final Authenticator authenticator = getInstance();
-    protected BaseClientObject baseClient;
+    protected ApacheHttpClientObject baseClient;
     protected CloseableHttpResponse response;
 
     public BaseClient (CloseableHttpClient client) {
-        baseClient = new BaseClientObject(client);
+        baseClient = new ApacheHttpClientObject(client);
     }
 
     protected Map<String, String> setHeadersMap(Scope scope){

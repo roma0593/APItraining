@@ -92,6 +92,16 @@
             <artifactId>commons-collections4</artifactId>
             <version>4.4</version>
         </dependency>
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>io.qameta.allure</groupId>
+            <artifactId>allure-rest-assured</artifactId>
+            <version>2.21.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -125,7 +135,7 @@
                 <configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>
-                            src\test\resources\api\APItests.xml
+                            src\test\resources\api\rest_assured_api_tests.xml
                         </suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>

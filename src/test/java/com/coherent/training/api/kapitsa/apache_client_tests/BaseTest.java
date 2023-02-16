@@ -1,7 +1,7 @@
-package com.coherent.training.api.kapitsa.apitests;
+package com.coherent.training.api.kapitsa.apache_client_tests;
 
-import com.coherent.training.api.kapitsa.util.interceptors.RequestInterceptor;
-import com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor;
+import com.coherent.training.api.kapitsa.util.apache_interceptors.RequestInterceptor;
+import com.coherent.training.api.kapitsa.util.apache_interceptors.ResponseInterceptor;
 import lombok.SneakyThrows;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;

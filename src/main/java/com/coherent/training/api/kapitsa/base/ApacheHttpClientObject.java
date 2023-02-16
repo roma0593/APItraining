@@ -15,10 +15,10 @@ import org.apache.http.util.EntityUtils;
 import java.io.File;
 import java.util.Map;
 
-import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
+import static com.coherent.training.api.kapitsa.util.apache_interceptors.ResponseInterceptor.getEntity;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-public class BaseClientObject {
+public class ApacheHttpClientObject {
     private final DataHandler handler = new DataHandler();
     private final CloseableHttpClient client;
     private HttpUriRequest request;
@@ -29,7 +29,7 @@ public class BaseClientObject {
     private static final String PATCH = "PATCH";
     private static final String DELETE = "DELETE";
 
-    public BaseClientObject(CloseableHttpClient client) {
+    public ApacheHttpClientObject(CloseableHttpClient client) {
         this.client = client;
     }
 

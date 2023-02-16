@@ -1,4 +1,4 @@
-package com.coherent.training.api.kapitsa.clients;
+package com.coherent.training.api.kapitsa.apache_http_clients;
 
 import com.coherent.training.api.kapitsa.util.plainobjects.Conditions;
 import com.coherent.training.api.kapitsa.util.plainobjects.UpdateUser;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.UPLOAD_USERS;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.USERS;
-import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
+import static com.coherent.training.api.kapitsa.util.apache_interceptors.ResponseInterceptor.getEntity;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLDER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;

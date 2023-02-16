@@ -1,6 +1,6 @@
-package com.coherent.training.api.kapitsa.apitests;
+package com.coherent.training.api.kapitsa.apache_client_tests;
 
-import com.coherent.training.api.kapitsa.clients.ZipCode;
+import com.coherent.training.api.kapitsa.apache_http_clients.ZipCode;
 import io.qameta.allure.*;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;

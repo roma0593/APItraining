@@ -1,6 +1,6 @@
-package com.coherent.training.api.kapitsa.clients;
+package com.coherent.training.api.kapitsa.apache_http_clients;
 
-import com.coherent.training.api.kapitsa.base.BaseClientObject;
+import com.coherent.training.api.kapitsa.base.ApacheHttpClientObject;
 import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
 import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
@@ -43,7 +43,7 @@ public class Authenticator {
 
     @SneakyThrows
     private String getBearerTokenForScope(String scope, CloseableHttpClient client) {
-        BaseClientObject baseClient = new BaseClientObject(client);
+        ApacheHttpClientObject baseClient = new ApacheHttpClientObject(client);
 
         try (CloseableHttpResponse response = baseClient.post(oauthUrl, setHeadersMap(), getFormEntity(scope))) {
             Token token = baseClient.getResponseBody(Token.class, response);
