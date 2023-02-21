@@ -135,7 +135,7 @@
                 <configuration>
                     <suiteXmlFiles>
                         <suiteXmlFile>
-                            src\test\resources\api\rest_assured_api_tests.xml
+                            src\test\resources\api\api_tests.xml
                         </suiteXmlFile>
                     </suiteXmlFiles>
                     <argLine>

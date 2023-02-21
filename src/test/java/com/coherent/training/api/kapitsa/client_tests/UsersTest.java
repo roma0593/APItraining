@@ -1,7 +1,5 @@
-package com.coherent.training.api.kapitsa.rest_assured_client_tests;
+package com.coherent.training.api.kapitsa.client_tests;
 
-import com.coherent.training.api.kapitsa.rest_assured_clients.Users;
-import com.coherent.training.api.kapitsa.rest_assured_clients.ZipCode;
 import com.coherent.training.api.kapitsa.util.DataHandler;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import com.coherent.training.api.kapitsa.utils.DataUtilization;
@@ -9,6 +7,7 @@ import io.qameta.allure.Description;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.Step;
+import lombok.SneakyThrows;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
@@ -25,10 +24,9 @@ import static org.apache.http.HttpStatus.*;
 import static org.testng.Assert.*;
 
 public class UsersTest extends BaseTest {
-    private final Users usersClient = new Users();
-    private final ZipCode zipCodeClient = new ZipCode();
     private final DataHandler dataHandler = new DataHandler();
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with all fields")
     @Step("Make POST request to /users API with body containing all user's fields")
@@ -48,6 +46,7 @@ public class UsersTest extends BaseTest {
         assertFalse(isZipCodeAvailable, "Zip code is available");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with invalid name/sex pair fields")
     @Step("Make POST request to /users API with body containing invalid name/sex pair")
@@ -63,6 +62,7 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserAdded, "User was added");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with required fields")
     @Step("Make POST request to /users API with body containing required user's fields")
@@ -78,6 +78,7 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserAdded, "User was not added");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with unavailable zipcodes")
     @Step("Make POST request to /users API with body containing user with unavailable zipcodes")
@@ -93,6 +94,7 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserAdded, "User was added");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting all users")
     @Step("Make GET request to /users API")
@@ -105,6 +107,7 @@ public class UsersTest extends BaseTest {
         assertTrue(users.size() > 0, "Users are not retrieved");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting users by olderThan parameter")
     @Step("Make GET request to /users API with olderThan parameter")
@@ -122,6 +125,7 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersOlder, "Not all users are older than " + age);
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting users by youngerThan parameter")
     @Step("Make GET request to /users API with youngerThan parameter")
@@ -139,6 +143,7 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersYounger, "Not all users are younger than " + age);
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting users by sex parameter")
     @Step("Make GET request to /users API with sex parameter")
@@ -156,6 +161,7 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersWithSex, "Not all users are " + sex);
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Update users with all valid fields")
     @Step("Make PUT/PATCH request to /users API with existing user and user to update in the body")
@@ -172,6 +178,7 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserUpdated, "User is not updated");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Update users with invalid zipcode field")
     @Step("Make PUT/PATCH request to /users API with existing user and user to update with invalid zipcode in body")
@@ -188,6 +195,7 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserUpdated, "User is updated");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Update users without required fields")
     @Step("Make PUT/PATCH request to /users API with existing user and user to update without required fields in the body")
@@ -204,6 +212,7 @@ public class UsersTest extends BaseTest {
         assertFalse(isUserUpdated, "User is updated");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Delete user with all fields")
     @Step("Make DELETE request to /users API with body containing user with all fields")
@@ -225,6 +234,7 @@ public class UsersTest extends BaseTest {
         assertTrue(isZipCodeAvailable, "Zip code is not available");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Delete user with required fields")
     @Step("Make DELETE request to /users API with body containing user with required fields")
@@ -246,6 +256,7 @@ public class UsersTest extends BaseTest {
         assertTrue(isZipCodeAvailable, "Zip code is not available");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Delete user with missed required fields")
     @Step("Make DELETE request to /users API with body containing user with missed required fields")
@@ -263,6 +274,7 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserExisted, "User is removed");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Upload users from the file")
     @Step("Make POST request to /users/upload API with multiform body from json file")
@@ -281,6 +293,7 @@ public class UsersTest extends BaseTest {
         assertEquals(numberOfUploadedUserResp, listOfUploadedUsers.size(), "Expected and actual number of uploaded users mismatch");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Upload users from the file with invalid zipcodes")
     @Step("Make POST request to /users/upload API with multiform body from json file containing users with invalid zipcodes")
@@ -299,6 +312,7 @@ public class UsersTest extends BaseTest {
         assertFalse(areUsersUploaded, "Users are uploaded");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Upload users from the file with missed required fields")
     @Step("Make POST request to /users/upload API with multiform body from json file containing users with missed required fields")

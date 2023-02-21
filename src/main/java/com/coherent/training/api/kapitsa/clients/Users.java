@@ -1,10 +1,14 @@
-package com.coherent.training.api.kapitsa.rest_assured_clients;
+package com.coherent.training.api.kapitsa.clients;
 
+import com.coherent.training.api.kapitsa.base.Client;
+import com.coherent.training.api.kapitsa.base.ResponseWrapper;
 import com.coherent.training.api.kapitsa.util.plainobjects.Conditions;
 import com.coherent.training.api.kapitsa.util.plainobjects.UpdateUser;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
+import lombok.SneakyThrows;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -23,62 +27,74 @@ public class Users extends BaseClient {
     private static final String UPLOAD_ENDPOINT = UPLOAD_USERS.getEndpoint();
     private static final int POSITION_TO_CUT = 18;
 
-    public void addUser(User user) {
-        response = client.post(USERS_ENDPOINT, setHeadersMap(WRITE), user);
+    public Users(Client client) {
+        super(client);
     }
 
-    public List<User> getAllUsers() {
-        response = client.get(USERS_ENDPOINT, setHeadersMap(READ));
-
-        User[] userArray = client.getResponseBody(response, User[].class);
-
-        return Arrays.asList(userArray);
-    }
-
-    public List<User> getAllUsersWithParam(Map<String, String> paramMap) {
-        response = client.get(USERS_ENDPOINT, setHeadersMap(READ), paramMap);
-
-        User[] userArray = client.getResponseBody(response, User[].class);
-
-        return Arrays.asList(userArray);
-    }
-
-    public void updateUser(User userChanger, User userToChange) {
-        UpdateUser updateUser = new UpdateUser(userChanger, userToChange);
-
-        response = client.patch(USERS_ENDPOINT, setHeadersMap(WRITE), updateUser);
-    }
-
-    public int uploadUsers(File file) {
-        Map<String, String> headersMap = setHeadersMap(WRITE);
-        headersMap.remove(CONTENT_TYPE);
-
-        response = client.post(UPLOAD_ENDPOINT, headersMap, file);
-
-        int responseCode = getStatusCodeOfResponse();
-
-        if (responseCode == 201) {
-            String responseBody = response.body().asString();
-            return getNumberOfUploadedUsers(responseBody);
-        } else {
-            return 0;
+    public void addUser(User user) throws IOException {
+        try (ResponseWrapper response = client.post(USERS_ENDPOINT, setHeadersMap(WRITE), user)) {
         }
     }
 
-    public void deleteUser(User userToDelete) {
-        client.delete(USERS_ENDPOINT, setHeadersMap(WRITE), userToDelete);
+    public List<User> getAllUsers() throws IOException {
+        try (ResponseWrapper response = client.get(USERS_ENDPOINT, setHeadersMap(READ))) {
+
+            User[] userArray = client.getResponseBody(User[].class);
+
+            return Arrays.asList(userArray);
+        }
+    }
+
+    public List<User> getAllUsersWithParam(Map<String, String> paramMap) throws IOException {
+        try (ResponseWrapper response = client.get(USERS_ENDPOINT, setHeadersMap(READ), paramMap)) {
+
+            User[] userArray = client.getResponseBody(User[].class);
+
+            return Arrays.asList(userArray);
+        }
+    }
+
+    public void updateUser(User userChanger, User userToChange) throws IOException {
+        UpdateUser updateUser = new UpdateUser(userChanger, userToChange);
+
+        try (ResponseWrapper response = client.patch(USERS_ENDPOINT, setHeadersMap(WRITE), updateUser)) {
+        }
+    }
+
+    public int uploadUsers(File file) throws IOException {
+        Map<String, String> headersMap = setHeadersMap(WRITE);
+        headersMap.remove(CONTENT_TYPE);
+
+        try (ResponseWrapper response = client.post(UPLOAD_ENDPOINT, headersMap, file)) {
+
+            int responseCode = getStatusCodeOfResponse();
+
+            if (responseCode == 201) {
+                String responseBody = client.getResponseBodyAsString();
+                return getNumberOfUploadedUsers(responseBody);
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    public void deleteUser(User userToDelete) throws IOException {
+        try (ResponseWrapper response = client.delete(USERS_ENDPOINT, setHeadersMap(WRITE), userToDelete)) {
+        }
     }
 
     private int getNumberOfUploadedUsers(String uploadResponse) {
         return Integer.parseInt(uploadResponse.substring(POSITION_TO_CUT));
     }
 
+    @SneakyThrows
     public boolean areUsersUploaded(List<User> uploadedUsers) {
         List<User> savedUsers = getAllUsers();
 
         return Objects.equals(uploadedUsers, savedUsers);
     }
 
+    @SneakyThrows
     public boolean isUserAdded(User userFromJson) {
         List<User> userList = getAllUsers();
 
