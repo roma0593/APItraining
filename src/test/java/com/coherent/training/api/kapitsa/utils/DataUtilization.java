@@ -12,12 +12,13 @@ import java.util.List;
 import java.util.Objects;
 
 public class DataUtilization {
-    private static final String ALL_FIELDS_USER = "src/test/resources/test_data/users/all_fields_user.json";
-    private static final String REQUIRED_FIELDS_USER = "src/test/resources/test_data/users/required_fields_user.json";
-    private static final String INVALID_ZIPCODE_USER = "src/test/resources/test_data/users/user_with_invalid_zip_code.json";
-    private static final String INVALID_NAME_SEX_USER = "src/test/resources/test_data/users/invalid_namesex_pair_user.json";
-    private static final String USER_FOR_UPDATE_REQ_FIELDS = "src/test/resources/test_data/users/user_for_update_req_fields.json";
-    private static final String USER_FOR_UPDATE_OPT_FIELDS = "src/test/resources/test_data/users/user_for_update_opt_fields.json";
+    private static final String ALL_FIELDS_USER = "src/test/resources/test_data/users/add_user/all_fields_user.json";
+    private static final String REQUIRED_FIELDS_USER = "src/test/resources/test_data/users/add_user/required_fields_user.json";
+    private static final String INVALID_ZIPCODE_USER = "src/test/resources/test_data/users/add_user/user_with_invalid_zip_code.json";
+    private static final String INVALID_NAME_SEX_USER = "src/test/resources/test_data/users/add_user/invalid_namesex_pair_user.json";
+    private static final String USER_FOR_UPDATE_REQ_FIELDS = "src/test/resources/test_data/users/update_user/user_for_update_req_fields.json";
+    private static final String USER_FOR_UPDATE_OPT_FIELDS = "src/test/resources/test_data/users/update_user/user_for_update_opt_fields.json";
+    private static final String EX_USER_FOR_UPDATE_ALL_FIELDS = "src/test/resources/test_data/users/update_user/existing_user_for_update.json";
     private static final JsonParser jsonParser = new JsonParser();
 
     @DataProvider(name = "allFieldsUserProvider")
@@ -42,7 +43,12 @@ public class DataUtilization {
 
     @DataProvider(name = "updateUserReqFieldsProvider")
     public static Object[][] updateUserReqFieldsProvider() {
-        return mergeDataProviders(usersForUpdateProvider(USER_FOR_UPDATE_REQ_FIELDS), allFieldsUserProvider());
+        return mergeDataProviders(usersForUpdateProvider(USER_FOR_UPDATE_REQ_FIELDS), existingUserForUpdateProvider());
+    }
+
+    @DataProvider(name = "existingUserForUpdateProvider")
+    public static Object[][] existingUserForUpdateProvider() {
+        return userProvider(EX_USER_FOR_UPDATE_ALL_FIELDS);
     }
 
     @DataProvider(name = "updateUserWithInvZipProvider")

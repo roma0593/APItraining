@@ -1,10 +1,12 @@
 package com.coherent.training.api.kapitsa.util.plainobjects;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class User {
     private int age;
     private String name;
@@ -14,7 +16,7 @@ public class User {
     public User() {
     }
 
-    public User(int age, String name, String sex, String zipCode) {
+    public User(String name, int age, String sex, String zipCode) {
         this.age = age;
         this.name = name;
         this.sex = sex;

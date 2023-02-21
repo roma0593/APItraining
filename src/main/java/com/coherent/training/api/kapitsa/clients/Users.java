@@ -1,106 +1,85 @@
 package com.coherent.training.api.kapitsa.clients;
 
+import com.coherent.training.api.kapitsa.base.Client;
+import com.coherent.training.api.kapitsa.base.ResponseWrapper;
 import com.coherent.training.api.kapitsa.util.plainobjects.Conditions;
 import com.coherent.training.api.kapitsa.util.plainobjects.UpdateUser;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import lombok.SneakyThrows;
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.UPLOAD_USERS;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.USERS;
-import static com.coherent.training.api.kapitsa.util.interceptors.ResponseInterceptor.getEntity;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.OLDER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Conditions.YOUNGER_THAN;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.READ;
 import static com.coherent.training.api.kapitsa.util.plainobjects.Scope.WRITE;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
-import static org.apache.http.HttpStatus.SC_CREATED;
 
 public class Users extends BaseClient {
     private static final String USERS_ENDPOINT = USERS.getEndpoint();
     private static final String UPLOAD_ENDPOINT = UPLOAD_USERS.getEndpoint();
     private static final int POSITION_TO_CUT = 18;
 
-    public Users(CloseableHttpClient client) {
+    public Users(Client client) {
         super(client);
     }
 
-    @SneakyThrows
-    public User addUser(User user) {
-        try {
-            response = baseClient.post(USERS_ENDPOINT, setHeadersMap(WRITE), user);
-
-            return baseClient.getRequestBody(User.class);
-        } finally {
-            baseClient.closeResponse(response);
+    public void addUser(User user) throws IOException {
+        try (ResponseWrapper response = client.post(USERS_ENDPOINT, setHeadersMap(WRITE), user)) {
         }
     }
 
-    public List<User> getAllUsers() {
-        try {
-            response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ));
+    public List<User> getAllUsers() throws IOException {
+        try (ResponseWrapper response = client.get(USERS_ENDPOINT, setHeadersMap(READ))) {
 
-            User[] userArray = baseClient.getResponseBody(User[].class, response);
+            User[] userArray = client.getResponseBody(User[].class);
+
             return Arrays.asList(userArray);
-        } finally {
-            baseClient.closeResponse(response);
         }
     }
 
-    public List<User> getAllUsersWithParam(Map<String, String> nameValueMap) {
-        try {
-            response = baseClient.get(USERS_ENDPOINT, setHeadersMap(READ), nameValueMap);
+    public List<User> getAllUsersWithParam(Map<String, String> paramMap) throws IOException {
+        try (ResponseWrapper response = client.get(USERS_ENDPOINT, setHeadersMap(READ), paramMap)) {
 
-            User[] userArray = baseClient.getResponseBody(User[].class, response);
+            User[] userArray = client.getResponseBody(User[].class);
+
             return Arrays.asList(userArray);
-        } finally {
-            baseClient.closeResponse(response);
         }
     }
 
-    @SneakyThrows
-    public User updateUser(User userChanger, User userToChange) {
+    public void updateUser(User userChanger, User userToChange) throws IOException {
         UpdateUser updateUser = new UpdateUser(userChanger, userToChange);
 
-        try {
-            response = baseClient.patch(USERS_ENDPOINT, setHeadersMap(WRITE), updateUser);
-            return baseClient.getRequestBody(UpdateUser.class).getUserNewValues();
-        } finally {
-            baseClient.closeResponse(response);
+        try (ResponseWrapper response = client.patch(USERS_ENDPOINT, setHeadersMap(WRITE), updateUser)) {
         }
     }
 
-    public int uploadUsers(File file) {
-        try {
-            Map<String, String> headersMap = setHeadersMap(WRITE);
-            headersMap.remove(CONTENT_TYPE);
+    public int uploadUsers(File file) throws IOException {
+        Map<String, String> headersMap = setHeadersMap(WRITE);
+        headersMap.remove(CONTENT_TYPE);
 
-            response = baseClient.post(UPLOAD_ENDPOINT, headersMap, file);
+        try (ResponseWrapper response = client.post(UPLOAD_ENDPOINT, headersMap, file)) {
 
             int responseCode = getStatusCodeOfResponse();
 
-            if (responseCode == SC_CREATED) {
-                return getNumberOfUploadedUsers(getEntity());
+            if (responseCode == 201) {
+                String responseBody = client.getResponseBodyAsString();
+                return getNumberOfUploadedUsers(responseBody);
             } else {
                 return 0;
             }
-
-        } finally {
-            baseClient.closeResponse(response);
         }
     }
 
-    public void deleteUser(User userToDelete) {
-        try {
-            response = baseClient.delete(USERS_ENDPOINT, setHeadersMap(WRITE), userToDelete);
-        } finally {
-            baseClient.closeResponse(response);
+    public void deleteUser(User userToDelete) throws IOException {
+        try (ResponseWrapper response = client.delete(USERS_ENDPOINT, setHeadersMap(WRITE), userToDelete)) {
         }
     }
 
@@ -108,38 +87,18 @@ public class Users extends BaseClient {
         return Integer.parseInt(uploadResponse.substring(POSITION_TO_CUT));
     }
 
+    @SneakyThrows
     public boolean areUsersUploaded(List<User> uploadedUsers) {
         List<User> savedUsers = getAllUsers();
 
-        return CollectionUtils.isEqualCollection(uploadedUsers, savedUsers);
+        return Objects.equals(uploadedUsers, savedUsers);
     }
 
+    @SneakyThrows
     public boolean isUserAdded(User userFromJson) {
         List<User> userList = getAllUsers();
 
-        boolean isAdded = false;
-
-        for (User user : userList) {
-            if (userFromJson.equals(user)) {
-                isAdded = true;
-                break;
-            }
-        }
-
-        return isAdded;
-    }
-
-    public boolean isUserUpdated(User updatedUser) {
-        boolean isUserUpdated = false;
-
-        for (User user : getAllUsers()) {
-            if (user.equals(updatedUser)) {
-                isUserUpdated = true;
-                break;
-            }
-        }
-
-        return isUserUpdated;
+        return userList.contains(userFromJson);
     }
 
     public boolean areUsers(List<User> userList, String value, Conditions... condition) {

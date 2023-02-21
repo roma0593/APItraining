@@ -84,4 +84,16 @@ public class ConfigFileReader {
         if (hostUrl != null) return hostUrl;
         else throw new RuntimeException("hostURL is not specified");
     }
+
+    public String getClientPath(){
+        properties = getPropertyFromCache(PROFILE_PATH);
+
+        String clientClass = properties.getProperty(CLIENT_CLASS.getPropertyKey());
+        String clientPathKey = String.format(PATH_TO.getPropertyKey(), clientClass);
+
+        String clientPath = properties.getProperty(clientPathKey);
+
+        if (clientPath != null) return clientPath;
+        else throw new RuntimeException("Client path is not specified");
+    }
 }

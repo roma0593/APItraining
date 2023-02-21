@@ -1,15 +1,18 @@
-package com.coherent.training.api.kapitsa.apitests;
+package com.coherent.training.api.kapitsa.client_tests;
 
-import com.coherent.training.api.kapitsa.clients.Users;
-import com.coherent.training.api.kapitsa.clients.ZipCode;
 import com.coherent.training.api.kapitsa.util.DataHandler;
 import com.coherent.training.api.kapitsa.util.plainobjects.User;
 import com.coherent.training.api.kapitsa.utils.DataUtilization;
-import io.qameta.allure.*;
+import io.qameta.allure.Description;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Step;
+import lombok.SneakyThrows;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,48 +24,45 @@ import static org.apache.http.HttpStatus.*;
 import static org.testng.Assert.*;
 
 public class UsersTest extends BaseTest {
-    private Users usersClient;
-    private ZipCode zipCodeClient;
     private final DataHandler dataHandler = new DataHandler();
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with all fields")
     @Step("Make POST request to /users API with body containing all user's fields")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void addUserWithAllFields(String age, String name, String sex, String zipCode) {
-        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToAdd = new User(name, parseInt(age), sex, zipCode);
 
-        usersClient = new Users(client);
-        User receivedUser = usersClient.addUser(userToAdd);
+        usersClient.addUser(userToAdd);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserAdded = usersClient.isUserAdded(receivedUser);
+        boolean isUserAdded = usersClient.isUserAdded(userToAdd);
 
-        zipCodeClient = new ZipCode(client);
         List<String> availableZipCodes = zipCodeClient.getAllZipCodes();
-        boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(availableZipCodes, receivedUser.getZipCode());
+        boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(availableZipCodes, userToAdd.getZipCode());
 
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
         assertTrue(isUserAdded, "User was not added");
         assertFalse(isZipCodeAvailable, "Zip code is available");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with invalid name/sex pair fields")
     @Step("Make POST request to /users API with body containing invalid name/sex pair")
-    @Link(name = "US-1")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "invalidNameSexUserProvider")
     public void addUserWithExistingNameSexPair(String age, String name, String sex, String zipCode) {
-        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToAdd = new User(name, parseInt(age), sex, zipCode);
 
-        usersClient = new Users(client);
-        User receivedUser = usersClient.addUser(userToAdd);
+        usersClient.addUser(userToAdd);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserAdded = usersClient.isUserAdded(receivedUser);
+        boolean isUserAdded = usersClient.isUserAdded(userToAdd);
 
         assertEquals(responseCode, SC_BAD_REQUEST, "Expected and actual response code mismatch");
         assertFalse(isUserAdded, "User was added");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with required fields")
     @Step("Make POST request to /users API with body containing required user's fields")
@@ -70,37 +70,36 @@ public class UsersTest extends BaseTest {
     public void addUserWithRequiredFields(String name, String sex) {
         User userToAdd = new User(name, sex);
 
-        usersClient = new Users(client);
-        User receivedUser = usersClient.addUser(userToAdd);
+        usersClient.addUser(userToAdd);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserAdded = usersClient.isUserAdded(receivedUser);
+        boolean isUserAdded = usersClient.isUserAdded(userToAdd);
 
         assertEquals(responseCode, SC_CREATED, "Expected and actual response code mismatch");
         assertTrue(isUserAdded, "User was not added");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Adding user with unavailable zipcodes")
     @Step("Make POST request to /users API with body containing user with unavailable zipcodes")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "invalidZipcodeUserProvider")
     public void addUserWithUnavailableZipCode(String age, String name, String sex, String zipCode) {
-        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToAdd = new User(name, parseInt(age), sex, zipCode);
 
-        usersClient = new Users(client);
-        User receivedUser = usersClient.addUser(userToAdd);
+        usersClient.addUser(userToAdd);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserAdded = usersClient.isUserAdded(receivedUser);
+        boolean isUserAdded = usersClient.isUserAdded(userToAdd);
 
         assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
         assertFalse(isUserAdded, "User was added");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting all users")
     @Step("Make GET request to /users API")
     @Test
     public void getAllUsers() {
-        usersClient = new Users(client);
         List<User> users = usersClient.getAllUsers();
         responseCode = usersClient.getStatusCodeOfResponse();
 
@@ -108,6 +107,7 @@ public class UsersTest extends BaseTest {
         assertTrue(users.size() > 0, "Users are not retrieved");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting users by olderThan parameter")
     @Step("Make GET request to /users API with olderThan parameter")
@@ -117,7 +117,6 @@ public class UsersTest extends BaseTest {
         Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put(olderParam, String.valueOf(age));
 
-        usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
         responseCode = usersClient.getStatusCodeOfResponse();
         boolean areUsersOlder = usersClient.areUsers(users, String.valueOf(age), OLDER_THAN);
@@ -126,6 +125,7 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersOlder, "Not all users are older than " + age);
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting users by youngerThan parameter")
     @Step("Make GET request to /users API with youngerThan parameter")
@@ -135,7 +135,6 @@ public class UsersTest extends BaseTest {
         Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put(youngerParam, String.valueOf(age));
 
-        usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
         responseCode = usersClient.getStatusCodeOfResponse();
         boolean areUsersYounger = usersClient.areUsers(users, String.valueOf(age), YOUNGER_THAN);
@@ -144,6 +143,7 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersYounger, "Not all users are younger than " + age);
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.NORMAL)
     @Description("Getting users by sex parameter")
     @Step("Make GET request to /users API with sex parameter")
@@ -153,7 +153,6 @@ public class UsersTest extends BaseTest {
         Map<String, String> nameValueMap = new HashMap<>();
         nameValueMap.put(sexParam, sex.toUpperCase());
 
-        usersClient = new Users(client);
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
         responseCode = usersClient.getStatusCodeOfResponse();
         boolean areUsersWithSex = usersClient.areUsers(users, sex);
@@ -162,67 +161,71 @@ public class UsersTest extends BaseTest {
         assertTrue(areUsersWithSex, "Not all users are " + sex);
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Update users with all valid fields")
     @Step("Make PUT/PATCH request to /users API with existing user and user to update in the body")
-    @Link(name = "US-2")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUserReqFieldsProvider")
-    public void updateUser(String newAge, String newName, String age, String name, String sex, String zipCode) {
-        usersClient = new Users(client);
-        User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newName, sex, zipCode), new User(parseInt(age), name, sex, zipCode));
+    public void updateUserWithAllFields(String newAge, String newName, String age, String name, String sex, String zipCode) {
+        User userNewValues = new User(newName, parseInt(newAge), sex, zipCode);
+        User userToChange = new User(newName, parseInt(newAge), sex, zipCode);
+
+        usersClient.updateUser(userNewValues, userToChange);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+        boolean isUserUpdated = usersClient.isUserAdded(userNewValues);
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(isUserUpdated, "User is not updated");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Update users with invalid zipcode field")
     @Step("Make PUT/PATCH request to /users API with existing user and user to update with invalid zipcode in body")
-    @Link(name = "US-2")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUserWithInvZipProvider")
     public void updateUserWithInvalidZip(String newAge, String newName, String newSex, String newZipCode, String age, String name, String sex, String zipCode) {
-        usersClient = new Users(client);
-        User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newName, newSex, newZipCode), new User(parseInt(age), name, sex, zipCode));
+        User userNewValues = new User(newName, parseInt(newAge), newSex, newZipCode);
+        User userToChange = new User(name, parseInt(age), sex, zipCode);
+
+        usersClient.updateUser(userNewValues, userToChange);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+        boolean isUserUpdated = usersClient.isUserAdded(userNewValues);
 
         assertEquals(responseCode, SC_FAILED_DEPENDENCY, "Expected and actual response code mismatch");
         assertFalse(isUserUpdated, "User is updated");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Update users without required fields")
     @Step("Make PUT/PATCH request to /users API with existing user and user to update without required fields in the body")
-    @Link(name = "US-3")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "updateUseOptFieldsProvider")
     public void updateUserWithoutReqFields(String newAge, String newZipCode, String age, String name, String sex, String zipCode) {
-        usersClient = new Users(client);
-        User updatedUser = usersClient.updateUser(new User(parseInt(newAge), newZipCode), new User(parseInt(age), name, sex, zipCode));
+        User userNewValues = new User(parseInt(newAge), newZipCode);
+        User userToChange = new User(name, parseInt(age), sex, zipCode);
+
+        usersClient.updateUser(userNewValues, userToChange);
         responseCode = usersClient.getStatusCodeOfResponse();
-        boolean isUserUpdated = usersClient.isUserUpdated(updatedUser);
+        boolean isUserUpdated = usersClient.isUserAdded(userNewValues);
 
         assertEquals(responseCode, SC_CONFLICT, "Expected and actual response code mismatch");
         assertFalse(isUserUpdated, "User is updated");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Delete user with all fields")
     @Step("Make DELETE request to /users API with body containing user with all fields")
-    @Link(name = "US-4")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void deleteUserWithAllFields(String age, String name, String sex, String zipCode) {
-        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToAdd = new User(name, parseInt(age), sex, zipCode);
         User userToDelete = new User(name, sex);
 
-        usersClient = new Users(client);
         usersClient.addUser(userToAdd);
         usersClient.deleteUser(userToDelete);
         responseCode = usersClient.getStatusCodeOfResponse();
         boolean isUserExisted = usersClient.isUserAdded(userToDelete);
 
-        zipCodeClient = new ZipCode(client);
         List<String> listOfZipCodes = zipCodeClient.getAllZipCodes();
         boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(listOfZipCodes, zipCode);
 
@@ -231,22 +234,20 @@ public class UsersTest extends BaseTest {
         assertTrue(isZipCodeAvailable, "Zip code is not available");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Delete user with required fields")
     @Step("Make DELETE request to /users API with body containing user with required fields")
-    @Link(name = "US-5")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void deleteUserWithRequiredFields(String age, String name, String sex, String zipCode) {
-        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToAdd = new User(name, parseInt(age), sex, zipCode);
         User userToDelete = new User(name, sex);
 
-        usersClient = new Users(client);
         usersClient.addUser(userToAdd);
         usersClient.deleteUser(userToDelete);
         responseCode = usersClient.getStatusCodeOfResponse();
         boolean isUserExisted = usersClient.isUserAdded(userToDelete);
 
-        zipCodeClient = new ZipCode(client);
         List<String> listOfZipCodes = zipCodeClient.getAllZipCodes();
         boolean isZipCodeAvailable = zipCodeClient.zipCodesAreSaved(listOfZipCodes, zipCode);
 
@@ -255,16 +256,15 @@ public class UsersTest extends BaseTest {
         assertTrue(isZipCodeAvailable, "Zip code is not available");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Delete user with missed required fields")
     @Step("Make DELETE request to /users API with body containing user with missed required fields")
-    @Link(name = "US-6")
     @Test(dataProviderClass = DataUtilization.class, dataProvider = "allFieldsUserProvider")
     public void deleteUserWithMissedRequiredFields(String age, String name, String sex, String zipCode) {
-        User userToAdd = new User(parseInt(age), name, sex, zipCode);
+        User userToAdd = new User(name, parseInt(age), sex, zipCode);
         User userToDelete = new User(name, zipCode);
 
-        usersClient = new Users(client);
         usersClient.addUser(userToAdd);
         usersClient.deleteUser(userToDelete);
         responseCode = usersClient.getStatusCodeOfResponse();
@@ -274,16 +274,15 @@ public class UsersTest extends BaseTest {
         assertTrue(isUserExisted, "User is removed");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Upload users from the file")
     @Step("Make POST request to /users/upload API with multiform body from json file")
     @Parameters({"allFieldsPath"})
-    @Link(name = "US-7")
     @Test
     public void uploadUsersWithAllFields(String allFieldsPath) {
         File file = new File(allFieldsPath);
-        List<User> listOfUploadedUsers = dataHandler.getObjectFromFile(file, List.class);
-        usersClient = new Users(client);
+        List<User> listOfUploadedUsers = Arrays.asList(dataHandler.getObjectFromFile(file, User[].class));
 
         int numberOfUploadedUserResp = usersClient.uploadUsers(file);
         responseCode = usersClient.getStatusCodeOfResponse();
@@ -294,17 +293,16 @@ public class UsersTest extends BaseTest {
         assertEquals(numberOfUploadedUserResp, listOfUploadedUsers.size(), "Expected and actual number of uploaded users mismatch");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Upload users from the file with invalid zipcodes")
     @Step("Make POST request to /users/upload API with multiform body from json file containing users with invalid zipcodes")
     @Parameters({"invZipcodePath"})
-    @Link(name = "US-8")
     @Test
     public void uploadUsersWithInvalidZipCode(String invZipcodePath) {
         File file = new File(invZipcodePath);
-        List<User> listOfUploadedUsers = dataHandler.getObjectFromFile(file, List.class);
+        List<User> listOfUploadedUsers = Arrays.asList(dataHandler.getObjectFromFile(file, User[].class));
 
-        usersClient = new Users(client);
         usersClient.uploadUsers(file);
 
         responseCode = usersClient.getStatusCodeOfResponse();
@@ -314,17 +312,16 @@ public class UsersTest extends BaseTest {
         assertFalse(areUsersUploaded, "Users are uploaded");
     }
 
+    @SneakyThrows
     @Severity(SeverityLevel.CRITICAL)
     @Description("Upload users from the file with missed required fields")
     @Step("Make POST request to /users/upload API with multiform body from json file containing users with missed required fields")
     @Parameters({"missedFieldsPath"})
-    @Link(name = "US-9")
     @Test
     public void uploadUsersWithMissedReqField(String missedFieldsPath) {
         File file = new File(missedFieldsPath);
-        List<User> listOfUploadedUsers = dataHandler.getObjectFromFile(file, List.class);
+        List<User> listOfUploadedUsers = Arrays.asList(dataHandler.getObjectFromFile(file, User[].class));
 
-        usersClient = new Users(client);
         usersClient.uploadUsers(file);
 
         responseCode = usersClient.getStatusCodeOfResponse();

@@ -1,17 +1,14 @@
 package com.coherent.training.api.kapitsa.clients;
 
-import com.coherent.training.api.kapitsa.base.BaseClientObject;
+import com.coherent.training.api.kapitsa.base.Client;
+import com.coherent.training.api.kapitsa.base.ResponseWrapper;
 import com.coherent.training.api.kapitsa.providers.ConfigFileReader;
 import com.coherent.training.api.kapitsa.util.plainobjects.Token;
 import lombok.SneakyThrows;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 
-import java.util.*;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.OAUTH_URL;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
@@ -33,34 +30,33 @@ public class Authenticator {
         return SingletonAuthenticator.INSTANCE;
     }
 
-    public String getBearerTokenForReadScope(CloseableHttpClient client) {
+    public String getBearerTokenForReadScope(Client client) {
         return getBearerTokenForScope("read", client);
     }
 
-    public String getBearerTokenForWriteScope(CloseableHttpClient client) {
+    public String getBearerTokenForWriteScope(Client client) {
         return getBearerTokenForScope("write", client);
     }
 
     @SneakyThrows
-    private String getBearerTokenForScope(String scope, CloseableHttpClient client) {
-        BaseClientObject baseClient = new BaseClientObject(client);
+    private String getBearerTokenForScope(String scope, Client client) {
+        try (ResponseWrapper response = client.post(oauthUrl, setHeadersMap(), getFormMap(scope))) {
 
-        try (CloseableHttpResponse response = baseClient.post(oauthUrl, setHeadersMap(), getFormEntity(scope))) {
-            Token token = baseClient.getResponseBody(Token.class, response);
+            Token token = client.getResponseBody(Token.class);
 
             return token.getAccessToken();
         }
     }
 
     @SneakyThrows
-    private StringEntity getFormEntity(String authScope) {
-        List<NameValuePair> params = new ArrayList<>();
+    private Map<String, String> getFormMap(String authScope) {
+        Map<String, String> formMap = new HashMap<>();
 
-        params.add(new BasicNameValuePair("grant_type", "client_credentials"));
-        params.add(new BasicNameValuePair("client_id", CLIENT_ID));
-        params.add(new BasicNameValuePair("scope", authScope));
+        formMap.put("grant_type", "client_credentials");
+        formMap.put("client_id", CLIENT_ID);
+        formMap.put("scope", authScope);
 
-        return new UrlEncodedFormEntity(params, "utf-8");
+        return formMap;
     }
 
     private String getEncodedBasicAuthData() {

@@ -1,4 +1,4 @@
-package com.coherent.training.api.kapitsa.util.interceptors;
+package com.coherent.training.api.kapitsa.util.apache_interceptors;
 
 import io.qameta.allure.Attachment;
 import org.apache.http.*;

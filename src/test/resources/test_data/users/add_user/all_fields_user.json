@@ -1,7 +1,7 @@
 [
   {
-    "age": 74,
     "name": "Steve",
+    "age": 74,
     "sex": "MALE",
     "zipCode": "23456"
   }

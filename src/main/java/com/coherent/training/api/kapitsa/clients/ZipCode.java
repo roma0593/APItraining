@@ -1,9 +1,13 @@
 package com.coherent.training.api.kapitsa.clients;
 
-import lombok.SneakyThrows;
-import org.apache.http.impl.client.CloseableHttpClient;
+import com.coherent.training.api.kapitsa.base.Client;
+import com.coherent.training.api.kapitsa.base.ResponseWrapper;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.EXPAND_ZIP_CODES;
 import static com.coherent.training.api.kapitsa.providers.UrlProvider.GET_ZIP_CODES;
@@ -14,63 +18,54 @@ public class ZipCode extends BaseClient {
     private static final String GET_ZIP_CODES_URL = GET_ZIP_CODES.getEndpoint();
     private static final String EXPAND_ZIP_CODES_URL = EXPAND_ZIP_CODES.getEndpoint();
 
-    public ZipCode(CloseableHttpClient client) {
+    public ZipCode(Client client) {
         super(client);
     }
 
-    @SneakyThrows
-    public List<String> getAllZipCodes() {
-        try {
-            response = baseClient.get(GET_ZIP_CODES_URL, setHeadersMap(READ));
+    public List<String> getAllZipCodes() throws IOException {
+        try (ResponseWrapper response = client.get(GET_ZIP_CODES_URL, setHeadersMap(READ))) {
+            String[] zipCodeArray = client.getResponseBody(String[].class);
 
-            return getListFromResponse();
-        } finally {
-            baseClient.closeResponse(response);
+            return Arrays.asList(zipCodeArray);
         }
     }
 
-    @SneakyThrows
-    public List<String> addNewZipCodes(String... zipCodes) {
-        try {
-            response = baseClient.post(EXPAND_ZIP_CODES_URL, setHeadersMap(WRITE), zipCodes);
+    public List<String> addNewZipCodes(String... zipCodes) throws IOException {
+        try (ResponseWrapper response = client.post(EXPAND_ZIP_CODES_URL, setHeadersMap(WRITE), zipCodes)) {
+            String[] zipCodeArray = client.getResponseBody(String[].class);
 
-            return getListFromResponse();
-        } finally {
-            baseClient.closeResponse(response);
+            return Arrays.asList(zipCodeArray);
         }
-    }
-
-    private List<String> getListFromResponse() {
-        return baseClient.getResponseBody(List.class, response);
     }
 
     public boolean zipCodesAreSaved(List<String> responseList, String... zipCodes) {
+        boolean isZipCodeSaved = true;
+
         for (String zipCode : zipCodes) {
-            if (!responseList.contains(zipCode))
-                return false;
-            break;
+            if (!responseList.contains(zipCode)) {
+                isZipCodeSaved = false;
+                break;
+            }
         }
 
-        return true;
-    }
-
-    private boolean isZipCodeUnique(List<String> responseList, String zipCode) {
-        for (String element : responseList) {
-            if (!element.equals(zipCode))
-                return false;
-            break;
-        }
-
-        return true;
+        return isZipCodeSaved;
     }
 
     public boolean isZipCodesUnique(List<String> responseList, String... zipCodes) {
-        boolean isUnique = true;
+        boolean isDuplicated = true;
+
+        List<String> duplicatedValues = responseList.stream()
+                .filter(e -> Collections.frequency(responseList, e) > 1)
+                .distinct()
+                .collect(Collectors.toList());
 
         for (String zipCode : zipCodes) {
-            isUnique = isZipCodeUnique(responseList, zipCode);
+            if (duplicatedValues.contains(zipCode)) {
+                isDuplicated = false;
+                break;
+            }
         }
 
-        return isUnique;
+        return isDuplicated;
     }
 }
