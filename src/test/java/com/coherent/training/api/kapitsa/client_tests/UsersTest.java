@@ -156,6 +156,7 @@ public class UsersTest extends BaseTest {
         List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
         responseCode = usersClient.getStatusCodeOfResponse();
         boolean areUsersWithSex = usersClient.areUsers(users, sex);
+        // hello
 
         assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
         assertTrue(areUsersWithSex, "Not all users are " + sex);
