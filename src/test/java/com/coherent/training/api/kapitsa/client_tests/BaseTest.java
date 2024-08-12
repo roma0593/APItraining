@@ -7,6 +7,8 @@ import lombok.SneakyThrows;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.testng.annotations.*;
 
+import java.io.IOException;
+
 import static com.coherent.training.api.kapitsa.providers.ClientInitializer.getCloseableHttpClient;
 import static com.coherent.training.api.kapitsa.providers.ClientInitializer.initClient;
 
@@ -26,9 +28,10 @@ public class BaseTest {
 
     @SneakyThrows
     @AfterClass
-    public void tearDown() {
+    public void tearDown() throws IOException {
         CloseableHttpClient closeableClient = getCloseableHttpClient();
 
         if (closeableClient != null) closeableClient.close();
+        System.out.println("Hello my friend!");
     }
 }
