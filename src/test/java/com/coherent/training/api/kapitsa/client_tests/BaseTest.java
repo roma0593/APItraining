@@ -5,7 +5,8 @@ import com.coherent.training.api.kapitsa.clients.Users;
 import com.coherent.training.api.kapitsa.clients.ZipCode;
 import lombok.SneakyThrows;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
 
 import java.io.IOException;
 
