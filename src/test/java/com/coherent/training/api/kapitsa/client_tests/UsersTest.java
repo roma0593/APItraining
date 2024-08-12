@@ -1,5 +1,8 @@
 package com.coherent.training.api.kapitsa.client_tests;
 
+import org.apache.commons.lang3.StringUtils;
+import org.testng.annotations.Test;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -388,90 +391,56 @@ public class UsersTest extends BaseTest {
                 Arrays.sort(arrChars);
                 char firstChar = arrChars[0];
 
-                List<User> users = usersClient.getAllUsersWithParam(nameValueMap);
-                responseCode = usersClient.getStatusCodeOfResponse();
-                boolean areUsersWithSex = usersClient.areUsers(users, sex);
-                // hello
-
-                assertEquals(responseCode, SC_OK, "Expected and actual response code mismatch");
-                assertTrue(areUsersWithSex, "Not all users are " + sex);
-            }
                 for (int i = 1; i < arrChars.length; i++) {
                     char nextChar = arrChars[i];
                     if (firstChar == nextChar) {
                         charSet.add(nextChar);
                     }
 
-            firstChar =nextChar;
-        }
-
-        return charSet.size();
-    }
-
-    public static char[] bubbleSorting(char[] providedArr) {
-        for (int i = 0; i < providedArr.length; i++) {
-            for (int j = 0; j < providedArr.length - i - 1; j++) {
-                if (providedArr[j] > providedArr[j + 1]) {
-                    char temp = providedArr[j];
-                    providedArr[j] = providedArr[j + 1];
-                    providedArr[j + 1] = temp;
+                    firstChar = nextChar;
                 }
+
+                return charSet.size();
+            }
+
+            public static char[] bubbleSorting(char[] providedArr) {
+                for (int i = 0; i < providedArr.length; i++) {
+                    for (int j = 0; j < providedArr.length - i - 1; j++) {
+                        if (providedArr[j] > providedArr[j + 1]) {
+                            char temp = providedArr[j];
+                            providedArr[j] = providedArr[j+1];
+                            providedArr[j+1] = temp;
+                        }
+                    }
+                }
+
+                return providedArr;
             }
         }
 
-        return providedArr;
+        System.out.println(TestClass.getMostSequenceChars("AABBCCDFGHQCWERTYu"));
+        System.out.println(TestClass.removeExtraSpaces("Hello! Please   remove   extra spaces!"));
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        var providedString = br.readLine();
+
+        System.out.printf("Is provided string [{%s}] a palindrome " + TestClass.isStringPolindrom(providedString), providedString);
+        System.out.println();
+
+        int x = 10;
+        int y = 20;
+        x = x + y;
+        y = x - y;
+        x = x - y;
+
+        providedString = br.readLine();
+        System.out.printf("Provided string %s", providedString);
+        System.out.printf("Reversed version %s", TestClass.reverseString(providedString));
+        System.out.println();
+        System.out.println(Math.sqrt(8));
+        System.out.println(Math.sqrt(8)%10);
+
+        System.out.println(TestClass.getNumberOfRepeatableChars("AALLNfdDSSF"));
+        System.out.println(TestClass.bubbleSorting(new char[] {'g', 'n', 'a', 't'}));
     }
 }
-
-        System.out.
-
-println(TestClass.getMostSequenceChars("AABBCCDFGHQCWERTYu"));
-        System.out.
-
-println(TestClass.removeExtraSpaces("Hello! Please   remove   extra spaces!"));
-
-BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-var providedString = br.readLine();
-
-        System.out.
-
-printf("Is provided string [{%s}] a palindrome "+TestClass.isStringPolindrom(providedString),providedString);
-        System.out.
-
-println();
-
-int x = 10;
-int y = 20;
-x =x +y;
-y =x -y;
-x =x -y;
-
-providedString =br.
-
-readLine();
-        System.out.
-
-printf("Provided string %s",providedString);
-        System.out.
-
-printf("Reversed version %s",TestClass.reverseString(providedString));
-        System.out.
-
-println();
-        System.out.
-
-println(Math.sqrt(8));
-        System.out.
-
-println(Math.sqrt(8)%10);
-
-        System.out.
-
-println(TestClass.getNumberOfRepeatableChars("AALLNfdDSSF"));
-        System.out.
-
-println(TestClass.bubbleSorting(new char[] {
-    'g', 'n', 'a', 't'
-}));
-        }
-        }
